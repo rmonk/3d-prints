@@ -22,7 +22,8 @@ Other projects:
 
 - **Hat stretcher:** an adjustable oval form, split front to back and
   spread by a printed turnbuckle, for stretching the band of the user's
-  57 cm flat cap.
+  57 cm flat cap. A drop-in brace in each half carries the turnbuckle's
+  thrust to the back of the oval.
 
 ## Layout
 
@@ -116,8 +117,8 @@ preview/<name>/        rendered PNGs, one subdirectory per project
 - `projects/hat_stretcher/`:
   - `hat_stretcher.scad`: the hat stretcher. Uses `library/BOSL2` and
     `library/shapes.scad`.
-  - `hat_stretcher_{half,rod,nuts}.stl`: exported parts, in print
-    orientation. Print the half twice.
+  - `hat_stretcher_{half,rod,nuts,brace}.stl`: exported parts, in print
+    orientation. Print the half and the brace twice.
 - `preview/<project>/<model>_<part>.png`: a `mounted` view and one image
   per part for each model, made by the commands under **Previews**.
 
@@ -645,6 +646,41 @@ unless the user asks otherwise.
    lines, cross wall, nut block and slot walls 6, fins 10.
 9. **Vents:** `vent_w` is 12 mm (18 at the old 50 mm height), so the wall
    keeps a 6.5 mm rim above and below each diamond.
+10. **Braces (`part="brace"`):** the user found the halves flexed where the
+    turnbuckle joins. The rod pushes on the nut block in the middle of the
+    cross wall, and the band pushes back on the oval wall at the cross wall's
+    ends. The cross wall is 6 lines (2.4 mm) thick, about 157 mm long, and
+    bends edgewise, so its middle bows back.
+    - **What the brace does:** it carries the thrust from the back of the
+      nut block straight to the back of the oval wall, where the band's
+      force arrives, so the cross wall no longer bends.
+    - **Shape:** a triangle in plan. A collar fits round the nut block and
+      bears on its back face either side of a slot for the rod end
+      (`rod_end` plus 2 mm). Two legs (`brace_leg_lines`, 10) run from the
+      collar's back corners to a curved pad. The pad stands
+      `brace_pad_gap` (3 mm) off the wall and bears on it through feet at
+      ellipse angles `brace_feet` (±10° and ±30°), between the vents (0,
+      ±20 and ±40°), so the vents still breathe. A spine runs from the
+      collar straight back to the pad's middle.
+    - **Why not hooks over the cross wall:** the user first asked for
+      triangles that slide over the cross wall and the guide walls. A part
+      behind the cross wall can only be held back by a face looking
+      forward. That means either a hook over the cross wall's top, which
+      sticks out above the back half and below the turned-over front
+      half, so the form rocks on the table, or the oval wall's inner face.
+      The user chose the oval wall.
+    - **Fit:** it drops in from the open side of each half (from the top
+      in the back half, from the bottom in the front half). It fits halves
+      already printed, unchanged. The collar's `brace_side_clearance`
+      (0.15 mm a side) is snug, so the brace stays in when the form is
+      lifted. The feet clear the wall by `brace_clearance` (0.2 mm), which
+      the band takes up as soon as it pulls.
+    - **One STL, printed twice:** it's a 2D outline extruded `brace_h`
+      (24 mm), symmetric in y. Both braces stand on the table, 1 mm below
+      the form's top.
+    - **Print orientation:** flat, as modelled. Every face is vertical, and
+      the thrust runs along the layers. About 83 × 83 mm, 29 cm³ (37 g of
+      PETG).
 
 ## Verification workflow
 
@@ -676,7 +712,8 @@ PNG previews need the sandbox disabled, or OpenSCAD writes nothing.
      slot's pointed end, plus a sliver of facets at about 48° where the
      neck slot's circle meets its 45° point (a `$fn` artifact).
    - **Screw, nut and jaw:** none.
-   - **Hat stretcher:** none (one degenerate sliver in the chamfer).
+   - **Hat stretcher:** none (one degenerate sliver in the chamfer). The
+     brace has none.
 4. **Fit checks:** intersect the parts at each pose. Pass `part="none"` with
    `-D`, because an assignment before `include` gets overwritten.
    - **Antenna cap path:** the 2D `cap2d()` against `clamp_body2d()` plus the
@@ -753,6 +790,14 @@ PNG previews need the sandbox disabled, or OpenSCAD writes nothing.
      14, 21 and 28 mm spread; the rod (plain cylinders for the threads,
      plus the wheel) against each half at each spread; the nuts (plain
      hex prisms, 0.01 mm off the cross wall) against both halves.
+   - **Hat stretcher brace, poses that must be clear:** each half's brace
+     (0.01 mm off the nut block) against its own half, the other half, the
+     rod (plain cylinders plus the wheel), the nuts and the other brace, at
+     0, 7, 14, 21 and 28 mm spread; the brace lowered in from 5, 12, 20 and
+     26 mm above.
+   - **Hat stretcher brace, poses that must overlap:** the brace moved
+     0.5 mm forward (the nut block), back (the oval wall) or sideways (the
+     collar).
    - **Hat stretcher, poses that must overlap:** the front half moved
      0.5 mm sideways (the fins), or closed past zero; the rod's wheel with
      the halves closed past zero; a nut moved 0.5 mm back, sideways or out
@@ -819,7 +864,7 @@ cd ../phone_holder
 openscad -o suction_cup_phone_holder.stl -D 'part="holder"' suction_cup_phone_holder.scad
 openscad -o suction_cup_phone_holder_adapter.stl -D 'part="adapter"' suction_cup_phone_holder.scad
 cd ../hat_stretcher
-for p in half rod nuts; do
+for p in half rod nuts brace; do
   openscad -o hat_stretcher_$p.stl -D "part=\"$p\"" hat_stretcher.scad
 done
 cd ../..
@@ -844,7 +889,7 @@ for p in mounted mount tray panel lock perch roof roof_bracket; do
   r bird_feeder suction_cup_bird_feeder_modular bird_feeder_modular_$p $p
 done
 for p in mounted holder adapter mounted_angled; do r phone_holder suction_cup_phone_holder phone_holder_$p $p; done
-for p in mounted half rod nuts; do r hat_stretcher hat_stretcher hat_stretcher_$p $p; done
+for p in mounted half rod nuts brace; do r hat_stretcher hat_stretcher hat_stretcher_$p $p; done
 ```
 
 ## Tuning notes for the user
@@ -898,5 +943,8 @@ for p in mounted half rod nuts; do r hat_stretcher hat_stretcher hat_stretcher_$
     enough for the nut slot; the asserts say which is too big.
   - **Fins:** if they're tight or loose in their slots, adjust
     `guide_clearance`.
+  - **Brace:** if it's hard to push onto the nut block, or falls out, adjust
+    `brace_side_clearance`. If it won't drop in past the oval wall, raise
+    `brace_clearance`. Move the feet with `brace_feet` if the vents change.
 - **Box holder object:** if your object is a fixed size, set `obj_t_max` to
   its thickness so the lips sit right at its front face.

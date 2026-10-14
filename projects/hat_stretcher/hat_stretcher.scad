@@ -25,6 +25,14 @@
 // side: both halves meet the gap parallel to the split, so the form
 // becomes a longer oval with straight sides, and the band isn't creased.
 //
+// The rod pushes the halves apart through the nut blocks in the middle of
+// the cross walls, and the band pushes back on the oval walls, so a cross
+// wall on its own bends: it's thin, and the load is in its middle. A brace
+// in each half (a separate part, dropped in from above) takes the thrust
+// straight from the back of the nut block to the back of the oval wall. It's
+// a triangle: two legs from a collar round the nut block to a curved pad
+// that bears on the wall through feet between the vent windows.
+//
 // Use: dampen the band (warm water or a little steam, but see the note on
 // heat below), fit the cap over the closed form, and turn the wheel until
 // the band is snug. Then a turn or so more each day as it dries, until
@@ -39,6 +47,8 @@
 //  - rod: standing on its right-hand end. The wheel's underside is a 45
 //    degree cone.
 //  - nuts: flat, one right-hand and one left-hand (marked R and L).
+//  - braces (print two, the same STL): flat. Every face is vertical, and
+//    the load runs along the layers.
 // Hot water or steam on the form itself softens PETG (and PLA much
 // sooner), so steam the cap before fitting it, not on the form; or print
 // in ASA if you want to steam it in place.
@@ -56,7 +66,7 @@ include <../../library/shapes.scad>
 
 /* [Output] */
 // Which part(s) to render
-part = "all"; // [all, half, rod, nuts, mounted]
+part = "all"; // [all, half, rod, nuts, brace, mounted]
 // How far apart the halves are in the mounted view
 show_spread = 20;
 
@@ -118,6 +128,24 @@ wheel_d = 23;
 // Height of the wheel's straight rim
 wheel_rim = 7;
 
+/* [Brace] */
+// Gap between the brace's feet and the oval wall
+brace_clearance = 0.2;
+// Gap each side between the brace's collar and the nut block (snug, so the brace stays in)
+brace_side_clearance = 0.15;
+// Leg thickness, in lines
+brace_leg_lines = 10;
+// Pad, spine and collar thickness, in lines
+brace_lines = 8;
+// Where the feet bear on the oval wall (ellipse angles from the back; vents are at 0, 20, 40 and 60)
+brace_feet = [10, 30];
+// Width of each foot along the wall
+brace_foot_w = 8;
+// Air gap between the pad and the wall, so the vents behind it still breathe
+brace_pad_gap = 3;
+// Brace height; it stands on the table, a little below the form's top
+brace_h = 24;
+
 /* [Hidden] */
 $fn = 64;
 eps = 0.01;
@@ -160,6 +188,19 @@ rod_l    = 2 * thread_l + wheel_t;
 slot_len = setback + stretch + fin_engage;        // fin length past the split
 slot_hw  = fin_t / 2 + guide_clearance;
 fin_top  = form_h / 2 - guide_clearance;
+
+// Brace
+leg_t    = lines(brace_leg_lines);
+brace_t  = lines(brace_lines);
+collar_t = lines(cross_lines);
+rod_end  = thread_l + wheel_t / 2;               // rod end, back from the split, with the halves closed
+rod_slot_hw = thread_d / 2 + 1;                  // slot in the brace the rod end runs in
+apex_x0  = rod_end + 2;                          // back of the rod slot
+apex_x1  = apex_x0 + brace_t;                    // back of the brace's collar block
+apex_hw  = block_hw + brace_side_clearance + collar_t;
+pad_in   = brace_clearance + brace_pad_gap;     // pad's outer face, in from the wall's inside
+pad_phi  = max(brace_feet);
+assert(brace_h <= form_h, "brace_h must not be more than form_h");
 
 echo(str("Hat stretcher: ", 2 * semi_a, " x ", 2 * semi_b, " x ", form_h,
          " closed, circumference ", closed_circ, " to ", max_circ,
@@ -246,6 +287,56 @@ module half() {
     }
 }
 
+// ---------- brace (mounted orientation, in the back half; prints as it is) ----------
+// Point on the oval's outside at ellipse angle phi from the back, moved in
+// along the wall's normal by d
+function oval_point(phi, d = 0) =
+    let(n = [-cos(phi) / semi_a, sin(phi) / semi_b])
+    [-semi_a * cos(phi), semi_b * sin(phi)] - d * n / norm(n);
+// Length along the oval per degree of ellipse angle, at phi
+function oval_rate(phi) = norm([semi_a * sin(phi), semi_b * cos(phi)]) * PI / 180;
+
+// Area inside the oval wall, inset by d
+module inside2d(d) { offset(-(wall_t + d)) ellipse2d(); }
+// Band between insets d0 and d1 (d1 > d0) from the wall's inside, from ellipse angle p0 to p1
+module oval_band2d(d0, d1, p0, p1) {
+    intersection() {
+        difference() { inside2d(d0); inside2d(d1); }
+        polygon(concat([[0, 0]], [for (p = [p0 : (p1 - p0) / 24 : p1 + eps]) 2 * oval_point(p)]));
+    }
+}
+
+module brace2d() {
+    // collar round the nut block, bearing on its back face either side of
+    // the rod slot
+    difference() {
+        translate([-apex_x1, -apex_hw]) square([apex_x1 - cross_x - 0.5, 2 * apex_hw]);
+        translate([-block_x, -(block_hw + brace_side_clearance)])
+            square([block_x, 2 * (block_hw + brace_side_clearance)]);
+        translate([-apex_x0, -rod_slot_hw]) square([apex_x0, 2 * rod_slot_hw]);
+    }
+    // pad, standing off the wall, and the feet that bear on it
+    pad_dp = (brace_foot_w / 2) / oval_rate(pad_phi);
+    oval_band2d(pad_in, pad_in + brace_t, -pad_phi - pad_dp, pad_phi + pad_dp);
+    for (s = [-1, 1], p = brace_feet) {
+        dp = (brace_foot_w / 2) / oval_rate(p);
+        oval_band2d(brace_clearance, pad_in + eps,
+                    s * p - dp, s * p + dp);
+    }
+    for (s = [-1, 1]) {
+        // leg from the collar's back corner to the pad over the outer feet
+        hull() {
+            translate([-apex_x1 + leg_t / 2, s * (apex_hw - leg_t / 2)]) circle(d = leg_t, $fn = 24);
+            translate(oval_point(s * pad_phi, wall_t + pad_in + brace_t / 2)) circle(d = leg_t, $fn = 24);
+        }
+    }
+    // spine from the collar straight back to the pad
+    translate([oval_point(0, wall_t + pad_in + brace_t / 2).x, -brace_t / 2])
+        square([-apex_x0 - oval_point(0, wall_t + pad_in + brace_t / 2).x, brace_t]);
+}
+
+module brace() { linear_extrude(brace_h, convexity = 10) brace2d(); }
+
 // ---------- turnbuckle rod (print orientation: right-hand end down, axis +Z) ----------
 module rod() {
     trapezoidal_threaded_rod(d = thread_d, l = thread_l + eps, pitch = thread_pitch,
@@ -309,6 +400,12 @@ module nuts_mounted(spread) {
     translate([spread / 2 + cross_x, 0, rod_z]) rotate([0, 90, 0]) nut(true);
 }
 
+// Braces standing on the table in each half
+module braces_mounted(spread) {
+    translate([-spread / 2, 0, 0]) brace();
+    translate([spread / 2, 0, 0]) mirror([1, 0, 0]) brace();
+}
+
 // Hat band around the spread form: the oval with straight sides
 module band(spread) {
     linear_extrude(form_h - 10, convexity = 10)
@@ -324,15 +421,19 @@ if (part == "mounted") {
     color("lightsteelblue") front_half(show_spread);
     color("orange") rod_mounted();
     color("dimgray") nuts_mounted(show_spread);
+    color("seagreen") braces_mounted(show_spread);
     %translate([0, 0, 5]) band(show_spread);
 } else if (part == "all") {
     half();
     translate([semi_a + 15, 0, 0]) rod();
     translate([semi_a + 15, 2 * nut_af, 0]) nuts();
+    translate([0, -(semi_b + 60), 0]) brace();
 } else if (part == "half") {
     half();
 } else if (part == "rod") {
     rod();
 } else if (part == "nuts") {
     nuts();
+} else if (part == "brace") {
+    brace();
 }
