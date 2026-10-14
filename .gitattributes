@@ -1,0 +1,2 @@
+# STLs are generated or exported meshes; show them as binary in diffs.
+*.stl -diff

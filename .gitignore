@@ -1,0 +1,13 @@
+# Third-party libraries: cloned and pinned by library/update_libraries.sh
+# (see library/libraries.txt). Run `library/update_libraries.sh install`.
+library/BOSL2/
+
+# Slicer and editor output
+result.json
+*.gcode
+*.3mf.bak
+*~
+.*.swp
+
+# Local Claude Code settings
+.claude/settings.local.json

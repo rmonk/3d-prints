@@ -1,0 +1,3 @@
+# Third-party OpenSCAD libraries pulled into library/.
+# Managed by update_libraries.sh. One per line: name  git-url  branch  pinned-commit
+BOSL2  https://github.com/BelfrySCAD/BOSL2.git  master  4566659a4751916fbe608a228f91df0eb7a7d425
