@@ -31,3 +31,10 @@ parameter in the Customizer.
 
 [`AGENTS.md`](AGENTS.md) holds the design notes, measured dimensions,
 print settings, verification workflow and export commands.
+
+## License
+
+The models, STLs, previews and docs are licensed under
+[CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) (see
+[`LICENSE`](LICENSE)). BOSL2, cloned into `library/` by the setup script,
+keeps its own BSD 2-Clause license.
