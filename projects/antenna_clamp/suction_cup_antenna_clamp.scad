@@ -4,9 +4,14 @@
 // can't rotate on the glass) with a hook-cap clamp in the middle
 // for a round rod such as an antenna mast.
 //
-// Both suction cup heads slide into T-slots from the front face of
+// Set cups = 1 for a short single-cup version, for a lighter
+// antenna or as a second support further along the same mast. The
+// clamp then sits right over the cup, so the rod's weight doesn't
+// twist it about the knob.
+//
+// The suction cup heads slide into T-slots from the front face of
 // the bar. A separate printed lock bar then slides lengthwise
-// through a channel just in front of both heads and snaps in place,
+// through a channel just in front of the heads and snaps in place,
 // so the heads can't slide back out (in any direction, including
 // when the bar is twisted). Squeeze the snap prongs to remove it.
 //
@@ -80,6 +85,8 @@ bolt_head_d = 5.5;
 nut_clearance = 0.3;
 
 /* [Suction Cups] */
+// Number of suction cups: 2 for the main mount, 1 for a short secondary one
+cups = 2; // [1, 2]
 // Gap between the two cups (cup sizes are in suction_cup.scad)
 cup_gap = 3;
 
@@ -113,8 +120,9 @@ $fn = 64;
 // ---------- derived values ----------
 bar_t        = floor_t + pocket_h + roof_thickness;
 
+assert(cups == 1 || cups == 2, "cups must be 1 or 2");
 cup_spacing  = cup_d + cup_gap;                // centre-to-centre
-bar_len      = cup_spacing + 2 * head_r + 2 * bar_wall;
+cup_xs       = cups == 2 ? [-cup_spacing / 2, cup_spacing / 2] : [0];
 
 // Lock channel sits directly in front of the heads, at head-pocket height
 chan_w       = lock_w + 2 * lock_clearance;
@@ -149,6 +157,13 @@ bolt_x       = cap_r + bolt_hole_d / 2 + 1;
 ear_x        = bolt_x + max(nut_ac, bolt_head_d) / 2 + 2;
 cap_top      = z_cap + cap_ear_t;
 nut_z        = bar_t + 0.5;                     // bottom of the nut slot
+// With one cup the bolt hole passes just beside the head pocket, so
+// it stops at the pocket's top instead of leaving a thin skin.
+bolt_z0      = cups == 1 ? floor_t + pocket_h : floor_t + 1;
+
+// The bar covers the cups, and the clamp with its chamfers
+bar_len      = max(cup_spacing * (cups - 1) + 2 * head_r + 2 * bar_wall,
+                   2 * (max(post_out, ear_x) + block_fillet + bar_corner_r));
 
 // Lock bar: body runs the full channel, barbs catch the far end face
 lock_len     = bar_len + 0.3;
@@ -156,7 +171,7 @@ barb_ramp    = 3;
 
 echo(str("Bar: ", bar_len, " x ", bar_w, " x ", bar_t,
          "  Rod centre height: ", bore_z, "  Cap top: ", bore_z + cap_r,
-         "  Bolt length: ", ceil(cap_top - nut_z), "-", floor(cap_top - floor_t - 1), " mm",
+         "  Bolt length: ", ceil(cap_top - nut_z), "-", floor(cap_top - bolt_z0), " mm",
          "  Lock bar: ", lock_len + lock_head_len + barb_ramp, " x ", lock_w, " x ", lock_t));
 
 // ---------- helpers ----------
@@ -249,14 +264,14 @@ module body() {
             extrude_y(y_front, y_back) bar2d();
             extrude_y(y_front, y_back) clamp_body2d();
         }
-        // cup slots, both open to the front
-        for (s = [-1, 1])
-            translate([s * cup_spacing / 2, 0, 0]) cup_slot(y_front);
+        // cup slots, all open to the front
+        for (x = cup_xs)
+            translate([x, 0, 0]) cup_slot(y_front);
         // lock bar channel, full length, at head-pocket height
         translate([-bar_len / 2 - 1, chan_front, floor_t])
             cube([bar_len + 2, chan_w, pocket_h]);
         // bolt hole, down into the bar (stops above the floor)
-        translate([bolt_x, y_mid, 0]) hole_z(bolt_hole_d, floor_t + 1, z_split + 1);
+        translate([bolt_x, y_mid, 0]) hole_z(bolt_hole_d, bolt_z0, z_split + 1);
         // captive nut slot, open through the back face (top when printed)
         translate([bolt_x, y_mid, nut_z])
             linear_extrude(nut_thickness + nut_clearance, convexity = 10)
