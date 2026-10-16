@@ -534,6 +534,10 @@ unless the user asks otherwise.
      magnet behind the top of the camera's back. The bump's size
      (`cam_bump_d`, 18) and position (`cam_magnet_from_top`, 25) are
      estimates, so check them against the camera.
+     - **How many:** one magnet wasn't enough. The user had to break
+       open the first print's slot to stack three before the camera
+       reported it was ready for birds. `cam_magnets` (3) sets the
+       stack, and the slot and spine grow with it.
    - **Front:** the lens (26 mm glass) is 97 mm down from the top. Its
      bezel is assumed to stand 1 mm proud (`cam_lens_proud`). A 10 mm
      button sticks out 13 mm, 25 mm down from the top.
@@ -545,39 +549,53 @@ unless the user asks otherwise.
    - **Height:** its walls run from a floor under the camera up to the
      top of the band.
    - **Shape:** it follows the pill outline, so its floor is a trough
-     round under the camera's bottom end. In plan its corners are rounded
-     like the camera's.
+     round under the camera's bottom end. In plan the pocket's corners
+     and the walls' corners are both rounded like the camera's, so the
+     walls are 4 lines thick all round.
+     - **Past bug:** the first print's pocket had square corners inside
+       rounded walls, leaving 0.07 mm at each corner. The slicer showed
+       them as vertical slots, and the user spotted them.
    - **Front:** a window round the lens with a pointed top.
      - **Groove:** a groove up the front wall's inside lets the lens's
        proud bezel slide down as the camera goes in. A rib outside keeps
-       the wall thickness over it.
+       the wall thickness over it. The rib is as wide as the window, so
+       no sliver is left beside the window, and its underside is 45°.
      - **Button:** it never reaches the walls, which stop below it.
    - **Drainage:** drain holes go through the bottom of the trough.
    - **Spine:** a spine rises up the back to above the magnet. Behind
      the pocket it holds:
      - a channel for the camera's bump;
      - a 2-line skin;
-     - the magnet slot;
+     - the magnet slot, deep enough for `cam_magnets` stacked;
      - a 3-line back skin.
 
      Both the channel and the slot open at the top of the spine, so the
-     magnet drops in from above and the cap covers it.
-6. **Cap (the user asked for it):** a hood over the camera's top.
+     magnets drop in from above and the cap covers them.
+6. **Cap (the user asked for it):** a roof over the camera's top.
    - **Purpose:** it keeps rain off the USB-C plug.
-   - **Shape:** inside, it follows the camera's round top, then rises at
-     45° over the shoulders to a plug space `usb_space` (35 mm) high with
-     a 45° pointed top. That leaves room for a straight plug and the
-     cable's bend.
+   - **History:** the first version was a hood that hugged the camera's
+     top. The user found it too small and asked for something more like a
+     roof.
+   - **Shape:** straight walls round the camera's top, under a hipped roof
+     with 45° slopes. The eaves reach `cap_eave` (8 mm) past the walls,
+     so water drips clear of them. The roof is a shell 4 lines thick, and
+     the eaves' undersides are cut back at 45°, so it prints upright.
+     It's about 70 × 71 mm and 65 mm tall.
+   - **Inside:** it follows the camera's round top over the shoulders,
+     then opens up into the roof. The roof's height is set so there's
+     `usb_space` (35 mm) above the camera's top over the plug, room for a
+     straight plug and the cable's bend.
    - **Seating:** it rests on the camera's shoulders. It's modelled
      settled there, `cap_sink` = `cap_clearance` × √2 lower than
      concentric.
-   - **Detent:** a 45° bump on the back of the spine reaches
-     `cap_detent` into a diamond window in the cap's back wall, so wind
-     can't lift it off.
+   - **Detents:** two 45° bumps on the back of the spine, one each side
+     of the cable slot, reach `cap_detent` into diamond windows in the
+     cap's back wall, so wind can't lift it off.
    - **Front:** a notch, open at the bottom, clears the button.
-   - **Cable:** it leaves through a slot in the side (`cap_cable_side`,
-     toward the glass by default). The slot is open at the bottom, so the
-     cap goes on with the cable already plugged in.
+   - **Cable:** it leaves through a slot up the middle of the back wall,
+     under the eave (the user asked for the back; it was first in the
+     side). The slot is open at the bottom, so the cap goes on with the
+     cable already plugged in.
    - **Print orientation:** upright, open bottom on the bed.
 7. **Held at its middle, turned and locked (the user asked for this):**
    - **Why the middle:** on the first version the camera stood on a
@@ -1251,10 +1269,11 @@ for p in mounted half rod nuts brace; do r hat_stretcher hat_stretcher hat_stret
     button positions. `cam_clearance` sets how loose it sits in the
     cradle.
   - **Magnet:** if the camera doesn't wake in the cradle, move
-    `cam_magnet_from_top` to where its bump is. `cam_magnet_d` and
-    `cam_magnet_t` set the magnet's size.
+    `cam_magnet_from_top` to where its bump is, or stack more with
+    `cam_magnets`. `cam_magnet_d` and `cam_magnet_t` set the magnet's
+    size.
   - **Cap:** set `usb_space` to suit the plug (a right-angle plug needs
-    less). `cable_d` sets the cable slot, `cap_cable_side` its side, and
+    less), and `cap_eave` for how far the roof overhangs. `cable_d` sets the cable slot, and
     `cap_detent` how firmly the cap stays on.
   - **Camera position:** `cam_lens_y` sets its height, and `cam_x` and
     `cam_z` where it pivots.

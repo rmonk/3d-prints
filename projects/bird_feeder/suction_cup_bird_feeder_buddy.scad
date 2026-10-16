@@ -22,14 +22,16 @@
 //    A 45 degree cone under the band seats it in the collar, and the
 //    teeth set its angle, outward (away from the glass) in steps of
 //    cam_yaw_step. The sleeve follows the camera's pill shape, and a spine
-//    up its back holds the 18 x 2 mm magnet the camera needs to switch
-//    on, behind the camera's magnet bump.
+//    up its back holds the stack of 18 x 2 mm magnets (3 by default)
+//    the camera needs to switch on, behind the camera's magnet bump.
 //  - cam_pin: a pin through two posts on the collar, over the band's top
 //    edge, so the cradle can't be lifted out of the teeth.
-//  - camera_cap: a hood over the top of the camera that keeps rain off
-//    the USB plug. It rests on the camera's rounded top, a small detent
-//    on the spine holds it down, and the cable leaves through a slot in
-//    its side, open at the bottom so the cap goes on with the cable in.
+//  - camera_cap: a hipped roof over the top of the camera that keeps rain
+//    off the USB plug, its eaves reaching cap_eave past the walls so
+//    water drips clear. It rests on the camera's rounded top, two small
+//    detents on the spine hold it down, and the cable leaves through a
+//    slot in its back wall under the eave, between the detents, open at
+//    the bottom so the cap goes on with the cable in.
 //  - upper_mount: a bracket with one suction cup, higher up the glass,
 //    that the panel bolts to through its 1/4"-20 socket with a steel
 //    bolt (panel_bolt_len, with a washer).
@@ -42,7 +44,7 @@
 // camera mount's cups into its slots from the side away from the feeder,
 // push the lock bar down its channel from the top until its prongs snap
 // out of the bottom, and press both cups onto the glass. Slide the collar's tab into the arm's
-// fork and drop collar_pin in from the top. Drop the magnet into the slot at the top of the
+// fork and drop collar_pin in from the top. Drop the magnets into the slot at the top of the
 // cradle's spine and the camera into the cradle, then lower the cradle
 // into the collar at the angle you want and push the pin through the
 // posts. Plug in the cable and push the cap down over the top. To turn
@@ -69,9 +71,9 @@
 //    degree cone, its teeth are vertical, and the lens window has a
 //    pointed top
 //  - cam_pin: flat, on the flat along its side
-//  - camera_cap: upright, open bottom on the bed. Its inside rises at 45
-//    degrees over the camera's shoulders to the plug space, which has a
-//    45 degree pointed top, and the slots have pointed tops
+//  - camera_cap: upright, open bottom on the bed. The roof's slopes and
+//    the undersides of its eaves are 45 degrees, its inside rises at 45
+//    degrees over the camera's shoulders, and the slots have pointed tops
 //  - upper_mount: on its bottom, which is parallel to the roof, so the
 //    bolt hole is vertical and the bolt head bears on the first layer.
 //    The cup slot leans 15 degrees, and the bracket's underside rises at
@@ -99,9 +101,11 @@ cam_d = 37.5;
 cam_bump = 2;
 cam_bump_d = 18;
 cam_magnet_from_top = 25;
-// Magnet in the cradle that switches the camera on: diameter and thickness
+// Magnets in the cradle that switch the camera on: diameter, thickness,
+// and how many are stacked in the slot (one wasn't enough)
 cam_magnet_d = 18;
 cam_magnet_t = 2;
+cam_magnets = 3;
 // Rounding of the camera's front and back edges (for the reference model)
 cam_edge_r = 3;
 // Lens centre, down from the top
@@ -136,12 +140,12 @@ cradle_wall_lines = 4;
 /* [Cap] */
 // Headroom above the camera's top for the USB plug and the cable's bend
 usb_space = 35;
+// How far the roof's eaves reach past its walls
+cap_eave = 8;
 // Width of the space for the plug
 usb_plug_w = 16;
 // Cable diameter (the exit slot is a little wider)
 cable_d = 4.5;
-// Side the cable leaves the cap: -1 toward the glass, 1 away from it
-cap_cable_side = -1; // [-1:Toward the glass, 1:Away from the glass]
 // How far the cap reaches down from the camera's top
 cap_down = 22;
 // Clearance between the cap and the camera (per side)
@@ -279,8 +283,9 @@ x_cb      = x_cf + cam_d;                            // camera back face
 y_mag     = cam_top - cam_magnet_from_top;           // magnet and bump centre
 // Spine up the back of the cradle: a channel for the bump, a skin, the
 // magnet slot and a back skin
+mag_stack = cam_magnets * cam_magnet_t;
 xm0       = pin_x / 2 + cam_bump + cam_clearance + lines(2);  // magnet slot, front face
-x_sp1     = xm0 + cam_magnet_t + 0.3 + lines(3);     // back of the spine
+x_sp1     = xm0 + mag_stack + 0.3 + lines(3);     // back of the spine
 sp_wd     = max(cam_magnet_d, cam_bump_d) + 2 * cam_clearance + 2 * lines(4);
 sp_top    = cam_top - 10;
 sl_r      = cam_edge_r + cam_clearance + cw;         // corner radius of the walls, in plan
@@ -304,10 +309,27 @@ cap_yc    = cam_top - cam_w / 2;                     // centre of the camera's t
 cap_r     = cam_w / 2 + cap_clearance;
 cap_xf    = x_cf - cap_clearance - capw;             // front, outside
 cap_xb    = x_sp1 + cap_clearance + capw;            // back, outside the spine
-det_y     = cam_top - 17;                            // detent
+det_y     = cam_top - 17;                            // detents
+det_z     = (cable_d + 0.6) / 2 + 4;                 // either side of the cable slot
 cap_sink  = cap_clearance * sqrt(2);                 // the cap settles onto the camera's shoulders
 cap_x_usb = x_cf + cam_d / 2;                        // plug and cable slot, front to back
+// The roof: hipped at 45 degrees over the walls' footprint grown by
+// cap_eave, a shell capw thick, its eaves cut back at 45 degrees underneath.
+// Inside it's open above cap_open; below, the inside follows the camera's
+// shoulders, which it rests on.
+cap_hz    = cap_r + capw;                            // walls, half width
+cap_c     = capw * sqrt(2);                          // the shell's thickness, measured vertically
+cap_X0    = cap_xf - cap_eave;                       // eaves' footprint
+cap_X1    = cap_xb + cap_eave;
+cap_Z     = cap_hz + cap_eave;
+cap_open  = cam_top - 2;
+// eaves' height: usb_space of headroom over the plug
+cap_ye    = cam_top + usb_space + cap_c - min(cap_x_usb - cap_X0, cap_X1 - cap_x_usb, cap_Z);
+cap_ct    = cam_top + 8;                             // top of the cable slot
 assert(sp_top > y_mag + cam_magnet_d / 2 + 1, "the spine must reach above the magnet");
+assert(cap_ct + (cable_d + 0.6) / 2 < cap_ye - cap_c + cap_eave - 1, "the cable slot must stay under the roof");
+assert(cap_ye - cap_c > cap_open, "the eaves must be above the cap's seat");
+assert(det_z + 2.5 < sp_wd / 2 - 1, "the detents must be on the spine");
 assert(det_y > cap_y0 + 3 && det_y < sp_top - 3, "the detent must be on the spine, inside the cap");
 assert(abs(n_teeth * cam_yaw_step - 360) < 0.01, "cam_yaw_step must divide 360");
 
@@ -513,8 +535,12 @@ module camera_cradle_local() {
             // walls, up to the top of the band
             ext_up(0, band_top) sleeve_plan2d();
             // rib outside the front wall, over the lens groove
-            box([-pin_x / 2 - cw - cam_lens_proud - 0.3, lens_y, -cam_lens_d / 2 - 0.5 - cw],
-                [-pin_x / 2 - cw + eps, band_top, cam_lens_d / 2 + 0.5 + cw]);
+            // (as wide as the window, so no sliver is left beside it), its
+            // underside at 45 degrees
+            rx0 = -pin_x / 2 - cw;
+            rd = cam_lens_proud + 0.3;
+            extrude_z(-win_r - cw, win_r + cw)
+                polygon([[rx0 + eps, lens_y - rd], [rx0 - rd, lens_y], [rx0 - rd, band_top], [rx0 + eps, band_top]]);
             // band: a 45 degree cone up from the walls to the teeth
             intersection() {
                 hull() {
@@ -532,16 +558,23 @@ module camera_cradle_local() {
             }
             // spine up the back, for the magnet
             box([pin_x / 2 - eps, 0, -sp_wd / 2], [x_sp1, sp_top, sp_wd / 2]);
-            // detent for the cap: a small 45 degree bump on the spine's
-            // back, reaching cap_detent into the cap's back wall
+            // detents for the cap, either side of its cable slot: small 45
+            // degree bumps on the spine's back, reaching cap_detent into
+            // the cap's back wall
             dh = cap_clearance + cap_detent;
-            extrude_z(-1.5, 1.5)
+            for (sz = [-1, 1]) extrude_z(sz * det_z - 1.5, sz * det_z + 1.5)
                 polygon([[x_sp1 - eps, det_y - dh], [x_sp1 + dh, det_y], [x_sp1 - eps, det_y + dh]]);
         }
-        // pocket: the camera's outline, round at the bottom, open at the top
-        extrude_x(-pin_x / 2, pin_x / 2) {
-            offset(delta = cam_clearance) pill2d(cam_w, cam_h, cb);
-            translate([-pin_z / 2, cb + cam_w / 2]) square([pin_z, cam_h + 50]);
+        // pocket: the camera's outline, round at the bottom, open at the
+        // top, its corners in plan rounded like the camera's, so the
+        // walls are cw thick there too
+        intersection() {
+            extrude_x(-pin_x / 2, pin_x / 2) {
+                offset(delta = cam_clearance) pill2d(cam_w, cam_h, cb);
+                translate([-pin_z / 2, cb + cam_w / 2]) square([pin_z, cam_h + 50]);
+            }
+            ext_up(-1, cam_top + 50) offset(r = sl_r - cw)
+                square([pin_x - 2 * (sl_r - cw), pin_z - 2 * (sl_r - cw)], center = true);
         }
         // lens window in the front wall, pointed at the top
         extrude_x(-pin_x / 2 - cw - cam_lens_proud - 1, -pin_x / 2 + eps)
@@ -554,7 +587,7 @@ module camera_cradle_local() {
         box([pin_x / 2 - eps, y_mag - cam_bump_d / 2 - cam_clearance, -cam_bump_d / 2 - cam_clearance],
             [pin_x / 2 + cam_bump + cam_clearance, sp_top + 1, cam_bump_d / 2 + cam_clearance]);
         box([xm0, y_mag - cam_magnet_d / 2 - 0.2, -cam_magnet_d / 2 - 0.2],
-            [xm0 + cam_magnet_t + 0.3, sp_top + 1, cam_magnet_d / 2 + 0.2]);
+            [xm0 + mag_stack + 0.3, sp_top + 1, cam_magnet_d / 2 + 0.2]);
         // drain holes along the bottom of the pocket
         for (sx = [-1, 0, 1])
             translate([sx * (pin_x / 2 - 4), -1, 0])
@@ -575,45 +608,71 @@ module camera_local() {
 }
 
 // The magnet and a USB-C plug, for reference
-module magnet_local() translate([xm0 + 0.15, y_mag, 0]) rotate([0, 90, 0]) cylinder(d = cam_magnet_d, h = cam_magnet_t);
+module magnet_local() translate([xm0 + 0.15, y_mag, 0]) rotate([0, 90, 0]) cylinder(d = cam_magnet_d, h = mag_stack);
 module usb_plug_local() translate([cap_x_usb - 3.5, cam_top, -6]) cube([7, usb_space - usb_plug_w / 2 - 2, 12]);
 
 // ---------- camera cap (cradle frame, mounted orientation) ----------
-// Inside, as [z, y]: round over the camera's shoulders, rising at 45
-// degrees to the plug space, which has a 45 degree pointed top
+// Inside, below cap_open, as [z, y]: round over the camera's shoulders
 module cap_inner2d() {
-    translate([0, cap_yc]) pointed_circle2d(cap_r, cap_r * sqrt(2));
-    polygon([[-usb_plug_w / 2, cap_yc], [usb_plug_w / 2, cap_yc],
-             [usb_plug_w / 2, cam_top + usb_space - usb_plug_w / 2], [0, cam_top + usb_space],
-             [-usb_plug_w / 2, cam_top + usb_space - usb_plug_w / 2]]);
-    translate([-cap_r, cap_y0 - 1]) square([2 * cap_r, cap_yc - cap_y0 + 1]);
+    intersection() {
+        union() {
+            translate([0, cap_yc]) pointed_circle2d(cap_r, cap_r * sqrt(2));
+            translate([-cap_r, cap_y0 - 1]) square([2 * cap_r, cap_yc - cap_y0 + 1]);
+        }
+        translate([-cap_r - 1, cap_y0 - 2]) square([2 * cap_r + 2, cap_open - cap_y0 + 2]);
+    }
+}
+
+// The roof's hip, its eaves at ye: 45 degree slopes up from the
+// footprint's edges to the ridge, and the footprint carried down `below`
+module cap_hip(ye, below) {
+    m = min(cap_X1 - cap_X0, 2 * cap_Z) / 2;
+    hull() {
+        box([cap_X0, ye - below, -cap_Z], [cap_X1, ye, cap_Z]);
+        box([cap_X0 + m - eps, ye + m - eps, -cap_Z + m - eps], [cap_X1 - m + eps, ye + m, cap_Z - m + eps]);
+    }
 }
 
 // Drawn where it rests: settled onto the camera's shoulders
 module camera_cap_local() translate([0, -cap_sink, 0]) {
     difference() {
-        // outside: one peaked hood over the shoulders and the plug space
-        extrude_x(cap_xf, cap_xb)
+        union() {
+            // walls, up into the roof
             intersection() {
-                hull() offset(delta = capw) cap_inner2d();
-                translate([-100, cap_y0]) square([200, 200]);
+                box([cap_xf, cap_y0, -cap_hz], [cap_xb, cap_ye + 100, cap_hz]);
+                cap_hip(cap_ye, 200);
             }
+            // roof shell, its eaves cut back at 45 degrees underneath
+            intersection() {
+                difference() {
+                    cap_hip(cap_ye, 200);
+                    cap_hip(cap_ye - cap_c, 200);
+                }
+                hull() {
+                    box([cap_X0 + cap_c, cap_ye - cap_c, -cap_Z + cap_c], [cap_X1 - cap_c, cap_ye - cap_c + eps, cap_Z - cap_c]);
+                    box([cap_X0 - 60, cap_ye + 60, -cap_Z - 60], [cap_X1 + 60, cap_ye + 60 + eps, cap_Z + 60]);
+                }
+            }
+        }
+        // inside: the seat over the shoulders, open above it into the roof
         extrude_x(cap_xf + capw, cap_xb - capw) cap_inner2d();
+        intersection() {
+            box([cap_xf + capw, cap_open - eps, -cap_r], [cap_xb - capw, cap_ye + 100, cap_r]);
+            cap_hip(cap_ye - cap_c, 200);
+        }
         // notch in the front for the camera's button
         bt = cam_top - cam_button_from_top + cam_button_d / 2 + 1;
         bw = cam_button_d / 2 + 1;
         extrude_x(cap_xf - 1, cap_xf + capw + 1)
             polygon([[-bw, cap_y0 - 1], [bw, cap_y0 - 1], [bw, bt], [0, bt + bw], [-bw, bt]]);
-        // cable slot in the side, open at the bottom
+        // cable slot out through the back wall, under the eave, open at
+        // the bottom, over the middle of the spine
         cs = (cable_d + 0.6) / 2;
-        ct = cam_top + 8;
-        translate([0, 0, cap_cable_side > 0 ? usb_plug_w / 2 : -100])
-            extrude_z(0, 100 - usb_plug_w / 2)
-                polygon([[cap_x_usb - cs, cap_y0 - 1], [cap_x_usb + cs, cap_y0 - 1],
-                         [cap_x_usb + cs, ct], [cap_x_usb, ct + cs], [cap_x_usb - cs, ct]]);
-        // window in the back for the detent on the spine
         extrude_x(cap_xb - capw - 1, cap_xb + 1)
-            translate([0, det_y + cap_sink]) polygon([[-2.5, 0], [0, -2.5], [2.5, 0], [0, 2.5]]);
+            polygon([[-cs, cap_y0 - 1], [cs, cap_y0 - 1], [cs, cap_ct], [0, cap_ct + cs], [-cs, cap_ct]]);
+        // windows in the back for the detents on the spine
+        for (sz = [-1, 1]) extrude_x(cap_xb - capw - 1, cap_xb + 1)
+            translate([sz * det_z, det_y + cap_sink]) polygon([[-2.5, 0], [0, -2.5], [2.5, 0], [0, 2.5]]);
     }
 }
 
