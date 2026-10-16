@@ -185,6 +185,9 @@ perch_clearance = 0.25;
 
 /* [Hidden] */
 $fn = 64;
+// Render the parts below. A file that includes this one sets it to false
+// after the include and renders its own.
+modular_output = true;
 
 // ---------- derived values ----------
 // Model coordinates (mounted orientation): x along the feeder, y up
@@ -636,35 +639,37 @@ module lock_print() {
             translate([0, 0, -kz0]) mirror([s, 0, 0]) translate([-(kx0 + tray_w / 2) / 2, 0, 0]) lock_key_local();
 }
 
-if (part == "mounted") {
-    color("silver") mount();
-    translate([0, -tray_drop, 0]) {
-        tray();
-        color("lightblue", 0.6)
-            translate([0, pg_y0, pg_z0 + panel_clearance]) panel();
-        color("orange") lock_keys();
-        color("peru") perch();
+if (modular_output) {
+    if (part == "mounted") {
+        color("silver") mount();
+        translate([0, -tray_drop, 0]) {
+            tray();
+            color("lightblue", 0.6)
+                translate([0, pg_y0, pg_z0 + panel_clearance]) panel();
+            color("orange") lock_keys();
+            color("peru") perch();
+        }
+        if (show_roof) {
+            color("tan") roof_brackets();
+            color("sienna", 0.8) roof();
+        }
+        // suction cups, for reference
+        for (s = [-1, 1])
+            %translate([s * cup_x, 0, glass_z]) cylinder(d1 = cup_d, d2 = 20, h = cup_standoff);
+    } else {
+        if (part == "all" || part == "mount")
+            translate([0, part == "all" ? 30 : 0, 0]) mount_print();
+        if (part == "all" || part == "tray")
+            tray_print();
+        if (part == "all" || part == "perch")
+            translate([0, part == "all" ? -20 : 0, 0]) perch_print();
+        if (part == "all" || part == "lock")
+            translate([part == "all" ? tray_w / 2 + 20 : 0, part == "all" ? -40 : 0, 0]) lock_print();
+        if (part == "all" || part == "roof")
+            translate([0, part == "all" ? 150 : 0, 0]) roof_print();
+        if (part == "all" || part == "roof_bracket")
+            translate([part == "all" ? -tray_w / 2 - 60 : 0, 0, 0]) roof_bracket_print();
+        if (part == "all" || part == "panel")
+            translate([0, part == "all" ? -(rail_z + perch_d + 40) - panel_h : 0, 0]) panel();
     }
-    if (show_roof) {
-        color("tan") roof_brackets();
-        color("sienna", 0.8) roof();
-    }
-    // suction cups, for reference
-    for (s = [-1, 1])
-        %translate([s * cup_x, 0, glass_z]) cylinder(d1 = cup_d, d2 = 20, h = cup_standoff);
-} else {
-    if (part == "all" || part == "mount")
-        translate([0, part == "all" ? 30 : 0, 0]) mount_print();
-    if (part == "all" || part == "tray")
-        tray_print();
-    if (part == "all" || part == "perch")
-        translate([0, part == "all" ? -20 : 0, 0]) perch_print();
-    if (part == "all" || part == "lock")
-        translate([part == "all" ? tray_w / 2 + 20 : 0, part == "all" ? -40 : 0, 0]) lock_print();
-    if (part == "all" || part == "roof")
-        translate([0, part == "all" ? 150 : 0, 0]) roof_print();
-    if (part == "all" || part == "roof_bracket")
-        translate([part == "all" ? -tray_w / 2 - 60 : 0, 0, 0]) roof_bracket_print();
-    if (part == "all" || part == "panel")
-        translate([0, part == "all" ? -(rail_z + perch_d + 40) - panel_h : 0, 0]) panel();
 }

@@ -14,6 +14,13 @@ mushroom-head suction cups:
   from five parts: a wall mount, a tray that lifts off, a clear back panel
   locked in by two keys, and a perch. An optional roof and two roof
   brackets can be added.
+- **Bird Buddy feeder:** a variant of the modular feeder. A Bird Buddy 2
+  camera module sits beside the tray on a window mount of its own, with
+  two cups one above the other.
+  Its angle can be turned and locked, and a cap over its top keeps rain
+  off the USB plug. A 165 × 197 mm solar panel, which
+  powers the camera over USB, is the roof. It's bolted to a frame on an
+  upper mount with one cup.
 - **Phone holder:** an iPhone 16 Pro in its case (153 × 72 × 11 mm), held
   upright on a shower screen with two suction cups, screen facing out.
   An optional angle adapter turns it 45° so the screen faces left.
@@ -34,6 +41,7 @@ library/               reusable SCAD code shared by every project
   BOSL2/               pinned third-party checkout (see libraries.txt)
   libraries.txt        third-party libraries and their pinned commits
   update_libraries.sh  installs, checks and updates them
+  flatten_scad.py      writes a single-file copy of a model, libraries inlined
 projects/<name>/       one directory per project: its .scad files and STLs
 preview/<name>/        rendered PNGs, one subdirectory per project
 ```
@@ -76,6 +84,19 @@ preview/<name>/        rendered PNGs, one subdirectory per project
 
 ## Files
 
+- `library/flatten_scad.py <in.scad> <out.scad>`: inlines every
+  `include`/`use`, once each.
+  - **Built-in names:** BOSL2 overrides built-ins such as `cube` and
+    `translate`, and reaches the real ones through `use <builtins.scad>`.
+    One file has one scope, so it renames BOSL2's versions `bosl2_*`
+    everywhere except in the `use`d file.
+  - **Parameters:** it moves the main file's Customizer parameters ahead
+    of the libraries, because a variable keeps the position of its first
+    assignment. It drops the libraries' assignments of those names, which
+    avoids "overwritten" warnings.
+  - **Customizer:** library code goes under `/* [Hidden] */`.
+  - **Check:** the output must render the same triangle sets as the
+    source with `HOME` pointed at an empty directory.
 - `library/shapes.scad`: small shared 2D helpers, currently
   `pointed_circle2d` (the teardrop for sideways holes).
   `suction_cup.scad` includes it.
@@ -107,6 +128,27 @@ preview/<name>/        rendered PNGs, one subdirectory per project
   - `suction_cup_bird_feeder_modular.scad` and
     `suction_cup_bird_feeder_modular_{mount,tray,panel,lock,perch,roof,roof_bracket}.stl`:
     the modular feeder and its exported parts.
+  - `suction_cup_bird_feeder_buddy.scad` and
+    `suction_cup_bird_feeder_buddy_{camera_mount,cam_lock_bar,camera_collar,collar_pin,camera_cradle,camera_cap,cam_pin,upper_mount,solar_frame}.stl`:
+    the Bird Buddy variant and its new parts (for `buddy_side = 1`). It
+    `include`s the modular file and reuses its mount, tray, panel, keys
+    and perch unchanged.
+    - **`modular_output`:** the modular file renders its parts only when
+      this is true. The variant sets it to false after the include.
+    - **Names:** the variant must not reuse a variable or module name from
+      the modular file or the library. The intended overrides are
+      `part`, `modular_output`, `roof_pitch`, `roof_headroom` and
+      `roof_back_gap`.
+      - **Why:** OpenSCAD silently uses the last value everywhere, so a
+        clash changes the reused parts. A `post_d` for the lock pin's
+        posts once changed the tray's corner posts.
+      - **Check:** the reused parts' triangle sets must match the modular
+        file's own renders.
+  - `suction_cup_bird_feeder_buddy_complete.scad`: a generated
+    single-file copy of the variant with the suction cup library and
+    the modular file inlined (about 66 kB), so it can be opened or
+    exported anywhere. Don't edit it. Regenerate it after any change to
+    the variant or what it includes (see **Exporting**).
   - `Suction Cup Bird Feeder Mk2.stl`: an incomplete export of the feeder
     (only one keyhole plate). Not used.
 - `projects/phone_holder/`:
@@ -429,6 +471,223 @@ unless the user asks otherwise.
 9. **Measured value:** `cup_standoff = 7` is the distance from the glass
    to the top of a cup. It comes from the original feeder's spacer ridge.
 
+## Bird Buddy feeder: design and why
+
+1. **A variant file, not a fork.** `suction_cup_bird_feeder_buddy.scad`
+   includes the modular file and uses its mount, tray, panel, keys and
+   perch unchanged, so a mount already printed is reused. The roof and
+   roof brackets aren't used.
+   - **Side:** `buddy_side` picks it (1 = +X, on the left seen from
+     indoors). Only the camera mount's STL changes with it. The collar,
+     cradle, upper mount and frame are symmetric about their own centres.
+2. **Camera mount:** a window mount of its own, touching nothing on the
+   feeder, so the tray still lifts off on its own.
+   - **History:** it was first a side mount that hung in the feeder
+     mount's roof bracket socket. The user asked for it to be separate,
+     on two cups one above the other.
+   - **Cups:** one at `cm_cup_top` (60) and one at `cm_cup_bot` (-40),
+     both at the camera's x, either side of the arm.
+     - **Spacing:** they're kept far enough from y = 0 to clear the
+       feeder mount's nearest cup, which an assert checks.
+     - **Slots:** both open sideways through the side away from the
+       feeder (+X), and the slots' sides hold the knobs up and down.
+       - **History:** they first opened in opposite directions; the user
+         asked for them on one side with a lock bar, like the antenna clamp.
+     - **Lock bar:** `cam_lock_bar` slides down a channel just past both
+       heads, at head-pocket height, the full length of the plate.
+       - **Stops:** its stop head rests on the top of the plate, and its
+         snap prongs' barbs catch the bottom face.
+       - **Width:** the channel and its outer wall set the mount's width,
+         `cm_w`, about 32 mm.
+       - **Removal:** squeeze the prongs to pull it out.
+     - **Fitting:** slide both cups in from the open side, push the bar
+       down until it snaps, then press both cups onto the glass.
+   - **Profile:** it's one side profile, [z, y], extruded `cm_w` (about 32 mm)
+     across.
+     - **Plate:** on the glass, `cm_t` thick. A foot at each end, beyond
+       the cups, reaches to `foot_gap` from the glass.
+     - **Arm:** it runs out at the collar's height and ends in a fork.
+     - **Gussets:** 45° gussets join the arm to the plate.
+     - **Seeds:** the bottom foot's top slopes at 45°, so seeds don't rest
+       on it.
+   - **In-plane loads:** the cups, the arm and the camera all lie in one
+     y–z plane, so the loads stay in the profile's plane.
+3. **Collar and joint:** the collar is a separate part, because it has to
+   print flat (axis vertical) for its teeth and seat.
+   - **Tab:** it has a `tab_len` × `tab_t` tab that slides into the arm's
+     fork.
+   - **Pin:** `collar_pin` (5 mm) drops through the fork and tab, head on
+     top.
+   - **Load path:** the tab's top and bottom faces bear on the fork's
+     prongs, so they carry the camera's moment. The pin only stops the
+     tab sliding out.
+4. **Camera:** a Bird Buddy 2 module, measured by the user.
+   - **Size:** 122 × 51 × 37.5 mm, plus a 2 mm magnet bump on the back.
+   - **Shape:** from the front it's a pill: the 51 mm width has full
+     semicircular ends. Across its depth it's nearly rectangular, with
+     edges rounded about 3 mm. This came from photos and from a
+     community holder for the same module (Printables "Bird Buddy Bath",
+     498120), whose pocket is 52 mm wide with round ends and about 31 mm
+     deep.
+   - **Magnet:** the module only switches on when it senses a magnet.
+     Bird Buddy's own holder and community holders use an 18 × 2 mm disc
+     magnet behind the top of the camera's back. The bump's size
+     (`cam_bump_d`, 18) and position (`cam_magnet_from_top`, 25) are
+     estimates, so check them against the camera.
+   - **Front:** the lens (26 mm glass) is 97 mm down from the top. Its
+     bezel is assumed to stand 1 mm proud (`cam_lens_proud`). A 10 mm
+     button sticks out 13 mm, 25 mm down from the top.
+   - **USB-C:** on top.
+   - **Facing:** portrait, looking across the tray along the perch (-X
+     for the +X side), with its lens at `cam_lens_y` (-22, 15 mm above
+     the perch top). That's above the tray's side wall, so it sees in.
+5. **Cradle:** a sleeve, open at the top.
+   - **Height:** its walls run from a floor under the camera up to the
+     top of the band.
+   - **Shape:** it follows the pill outline, so its floor is a trough
+     round under the camera's bottom end. In plan its corners are rounded
+     like the camera's.
+   - **Front:** a window round the lens with a pointed top.
+     - **Groove:** a groove up the front wall's inside lets the lens's
+       proud bezel slide down as the camera goes in. A rib outside keeps
+       the wall thickness over it.
+     - **Button:** it never reaches the walls, which stop below it.
+   - **Drainage:** drain holes go through the bottom of the trough.
+   - **Spine:** a spine rises up the back to above the magnet. Behind
+     the pocket it holds:
+     - a channel for the camera's bump;
+     - a 2-line skin;
+     - the magnet slot;
+     - a 3-line back skin.
+
+     Both the channel and the slot open at the top of the spine, so the
+     magnet drops in from above and the cap covers it.
+6. **Cap (the user asked for it):** a hood over the camera's top.
+   - **Purpose:** it keeps rain off the USB-C plug.
+   - **Shape:** inside, it follows the camera's round top, then rises at
+     45° over the shoulders to a plug space `usb_space` (35 mm) high with
+     a 45° pointed top. That leaves room for a straight plug and the
+     cable's bend.
+   - **Seating:** it rests on the camera's shoulders. It's modelled
+     settled there, `cap_sink` = `cap_clearance` × √2 lower than
+     concentric.
+   - **Detent:** a 45° bump on the back of the spine reaches
+     `cap_detent` into a diamond window in the cap's back wall, so wind
+     can't lift it off.
+   - **Front:** a notch, open at the bottom, clears the button.
+   - **Cable:** it leaves through a slot in the side (`cap_cable_side`,
+     toward the glass by default). The slot is open at the bottom, so the
+     cap goes on with the cable already plugged in.
+   - **Print orientation:** upright, open bottom on the bed.
+7. **Held at its middle, turned and locked (the user asked for this):**
+   - **Why the middle:** on the first version the camera stood on a
+     toothed pad at its bottom. The user pointed out the torque that put
+     on the mount, since anything pressing on the top had the camera's
+     whole height as a lever.
+   - **Collar:** it's pinned in the camera mount's fork. The cradle hangs
+     in it by a band round its middle.
+   - **Height:** the seat is `collar_h` (60 mm) above the camera's
+     bottom, about its middle. That keeps the lever to the top short, and
+     the camera's centre of mass is near the collar.
+   - **Out of the view:** the collar's bottom inner edge and the band's
+     cone stay above the lens's view. An assert checks they're at least
+     `cam_view_half` (55°) above horizontal, seen from the lens centre;
+     they're at 64°.
+   - **Seat:** the sleeve below the band passes through the collar's bore
+     (`r_bore`). The band's underside is a 45° cone that rests on a
+     matching 45° seat, which centres it.
+   - **Teeth:** `n_teeth` (360 / `cam_yaw_step`, 7.5° steps) round the
+     band mesh with internal teeth in the collar.
+     - **Printing:** they're vertical extrusions, and the band's teeth have
+       their bottoms cut back on the same cone.
+     - **Facets:** the collar's circles use `fn_teeth` (4 × `n_teeth`)
+       facets, so every step lines up.
+   - **Lock:** `cam_pin` goes through two posts at the back of the collar
+     (toward the glass), just over the band's top edge, so the cradle
+     can't be lifted off the teeth.
+     - **Pin:** it's round with a flat for printing, and goes in flat side
+       up.
+     - **Posts:** they stand outside the band, so the cradle lifts out once
+       the pin is pulled.
+   - **Turning it:** pull the pin, lift the cradle `spline_h` (5 mm), turn
+     it and drop it back.
+   - **Range:** the fit checks cover 0–45° outward, where nothing hits.
+   - **Ruled out:**
+     - **A toothed pad under the camera with a thumbscrew clamp:** the
+       first version. It had the torque problem above.
+     - **A sprung latch on the collar:** any arm that could reach over the
+       band would bend across its layers.
+8. **Solar panel:** 197 × 165 mm.
+   - **Thickness:** 5 mm at the edge and 7 mm by the junction box. The box
+     is the full 15 mm.
+   - **Box:** 50.5 × 72 mm, 47 mm from the cable edge.
+   - **Socket:** 1/4"-20, centred along the 197 mm side, 57 mm (2.25 in)
+     from the cable edge.
+   - **Back holes:** the four small holes in the panel's back aren't used.
+   - **Weight:** 210 g, plus 50 g of cable.
+9. **Frame (the roof):**
+   - **Orientation:** the panel goes in with its long side along the
+     feeder and its cable edge toward the glass.
+   - **Plate:** the box sits on the frame's plate. The plate is open
+     under the panel except for a band round the box and two ribs.
+   - **Rim:** ledges in the rim carry the panel's edges 10 mm up. The rim
+     wall stops 1.5 mm below the panel's face, so water runs off the
+     front.
+   - **Cable:** a notch in the back rim lets the cable out.
+   - **Size:** the frame is 250 mm wide (`frame_w`, the bed limit), from
+     7 mm past the tray on the far side, so on the camera side it covers
+     the camera at 0° but not all of it when turned.
+   - **Height:** its front edge is `roof_headroom` above the perch top,
+     as with the modular roof.
+10. **Upper mount and bolt:** the panel's socket faces down at 15°, so a
+   bolt from below needs a face for its head to bear on.
+   - **Bolt head:** the bracket's bottom is parallel to the roof, and the
+     bolt runs straight through it, so the head bears on the first layer.
+     A pocketed head would need a bridged ceiling.
+   - **Bolt and height:** a 1/4"-20 × 2 in steel bolt with a washer
+     (`panel_bolt_len`, `socket_engage` 8 mm into the socket) sets the
+     bracket's height, `um_h`.
+   - **Turning:** two pins on the pad go into holes in the plate, so the
+     frame can't turn on the bolt.
+   - **Load:** the cup is at the socket's x, so the panel's weight doesn't
+     twist the knob.
+   - **Feet:** two feet outside the cup (`um_feet_x`) take the cantilever
+     against the glass.
+   - **Fixed angle:** the tilt is fixed at `roof_pitch`, as the user
+     chose.
+11. **Print orientation:**
+   - **Rule (the user's):** each part prints flat, turned so its main
+     loads in use run along the layers.
+   - **Camera mount:** on its side (its -X face on the bed), so its side
+     profile lies in every layer.
+     - **Loads:** the cups' pull and push on the glass, the camera's
+       weight and the arm's bending are all in that plane, so they load
+       it along the layers.
+     - **Cup slots:** they run up through it, closed ends at the bottom as
+       floors.
+     - **Lock bar channel:** its ceiling is a 3.8 mm bridge along the
+       plate, as on the antenna clamp.
+     - **Fork pin hole:** pointed at the top.
+     - **Size:** about 175 × 72 mm on the bed and 32 mm tall.
+   - **Collar:** flat, as mounted, so the ring, tab and seat take the
+     cradle's weight along the layers. About 99 × 79 mm, 16 mm tall.
+   - **Collar pin and lock pin:** flat, on their flats, so they bend along
+     their layers.
+   - **Camera mount lock bar:** flat, so its prongs flex along the layers.
+     It's about 182 mm long.
+   - **Cradle:** upright, on its floor. About 74 mm across the band and
+     115 mm tall.
+     - **Why upright:** it's the only orientation where its teeth and
+       45° cone print.
+     - **Exception to the rule:** below the band, the camera's weight
+       hangs from the walls across the layers. That's about 2 N over
+       300 mm² of wall, roughly 0.01 MPa.
+   - **Cap:** upright, open bottom on the bed.
+   - **Pin:** flat, on its flat.
+   - **Upper mount:** on its bottom, so the cup slot leans 15°. Its pointed
+     end's faces are then about 47° from horizontal, still printable.
+   - **Frame:** flat, plate on the bed, 250 × 172 mm.
+
 ## Phone holder: design and why
 
 1. **Two cups, one above the other, slots opening outward.** The top
@@ -706,6 +965,11 @@ PNG previews need the sandbox disabled, or OpenSCAD writes nothing.
    - **Modular feeder:** the mount's 1.8 mm and 4.2 mm cup slot flats, and
      the 1 × 3.5 mm flat on top of each barb pocket in the tray. The panel,
      keys, perch, roof and roof brackets have none.
+   - **Bird Buddy feeder:** the camera mount's lock bar channel ceiling
+     (3.8 mm wide, the plate's length), and the 1.8 mm and 4.2 mm cup slot
+     flats in the upper mount. In the upper mount, which prints
+     tilted 15°, each flat shows up twice. There are also some zero-area
+     slivers. The collar, cradle, cap, pins and frame have none.
    - **Phone holder angle adapter:** the 1.8 mm and 4.2 mm cup slot flats in
      each block, and a 0.02 mm² point at each knob tip.
    - **Phone holder:** the 1.8 mm and 4.2 mm flats at the bottom cup
@@ -767,6 +1031,56 @@ PNG previews need the sandbox disabled, or OpenSCAD writes nothing.
      - Each key moved 0.5 mm outward (the barb catches), inward (it
        bottoms out), up or toward the glass.
      - The perch moved 0.5 mm forward, down or sideways.
+   - **Bird Buddy feeder, poses that must be clear:**
+     - **Camera mount and its surroundings:** the camera mount, collar and
+       collar pin against the tray set (hanging, lifted 5–22 mm, and pulled
+       away 4, 8 and 30 mm), the feeder mount, its cups and the glass.
+     - **Its cups:** each knob and cup body at rest. The neck path, head
+       path and cup body sliding in 10, 25 and 40 mm from the open side.
+     - **Lock bar:** the bar in its channel (0.01 mm up), against both
+       knobs. Sliding in from 20, 80 and 150 mm with `cbar_barb = -0.05`.
+     - **Collar and pin:** the collar in the fork (0.01 mm up), and slid
+       out 5, 12 and 25 mm. The collar pin (0.01 mm up) against the mount
+       and the collar.
+     - **Cradle and camera:** at each 7.5° step from 0 to 45°, against the
+       camera mount and collar, each other, the tray set (hanging, lifted and pulled
+       away), the frame and the upper mount.
+     - **Cap:** in each of those poses (with the camera, cradle and plug),
+       against the camera mount and collar, frame, upper mount and tray set. At rest
+       (0.03 mm up) against the camera, plug and cradle. Lowered in from
+       5, 15 and 30 mm with `cap_detent = -0.05`.
+     - **Camera and magnet:** the camera lowered into the cradle from 10,
+       60 and 130 mm. The magnet in its slot, against the cradle and the
+       camera.
+     - **Turning:** the cradle lifted `spline_h` + 0.1 mm and turned half a
+       step.
+     - **Collar:** the cradle and camera lowered into it from 10, 30, 60
+       and 100 mm. The cradle lifted 0.5 mm without the pin.
+     - **Lock pin:** against the collar and mount, and against the cradle
+       at each step.
+     - **Panel:** the panel (box plus slab) in the frame, 0.01 mm up.
+     - **Frame and upper mount:** the frame on the upper mount, 0.01 mm up.
+       The upper mount against its knob, its cup body (at rest and sliding
+       in 10 and 30 mm, with neck and head paths) and the glass. The frame
+       and upper mount against the glass, the tray set (hanging, lifted
+       and pulled away up to 30 mm), the feeder mount and the camera mount
+       and collar.
+   - **Bird Buddy feeder, poses that must overlap:**
+     - The collar moved 0.5 mm up, down or back in the fork. Moved 0.5 mm
+       out or sideways, it hits the collar pin.
+     - The cradle seated half a step round (the teeth lock it), 0.3 mm
+       lower (it rests on the seat) or 0.5 mm sideways.
+     - The cradle lifted 0.5 mm with the pin in.
+     - The cap moved 0.3 mm down (it rests on the camera) or 0.6 mm up
+       (the detent).
+     - The camera moved 0.8 mm back or sideways in the cradle.
+     - The panel moved 0.6 mm sideways or down the slope in the frame.
+     - The frame moved 1 mm sideways on the upper mount (the pins).
+     - Each camera mount knob moved 0.5 mm deeper, up, down or off the
+       glass, or 1 mm out against the lock bar. The upper mount's knob
+       moved deeper or off the glass.
+     - The lock bar pulled 0.5 mm up (the barbs catch) or pushed 0.5 mm
+       down (the head stops).
    - **Phone holder, poses that must be clear:** with `fin_preload =
      -0.05`, the phone seated (0.01 mm up and back) and lowered in from
      10, 40, 80 and 150 mm above; each cup knob at rest, and swept 60 mm
@@ -860,6 +1174,10 @@ done
 for p in mount tray panel lock perch roof roof_bracket; do
   openscad -o suction_cup_bird_feeder_modular_$p.stl -D "part=\"$p\"" suction_cup_bird_feeder_modular.scad
 done
+for p in camera_mount cam_lock_bar camera_collar collar_pin camera_cradle camera_cap cam_pin upper_mount solar_frame; do
+  openscad -o suction_cup_bird_feeder_buddy_$p.stl -D "part=\"$p\"" suction_cup_bird_feeder_buddy.scad
+done
+../../library/flatten_scad.py suction_cup_bird_feeder_buddy.scad suction_cup_bird_feeder_buddy_complete.scad
 cd ../phone_holder
 openscad -o suction_cup_phone_holder.stl -D 'part="holder"' suction_cup_phone_holder.scad
 openscad -o suction_cup_phone_holder_adapter.stl -D 'part="adapter"' suction_cup_phone_holder.scad
@@ -887,6 +1205,9 @@ for p in mounted base jaw screw nut pad; do r box_holder suction_cup_box_holder 
 for p in mounted feeder panel; do r bird_feeder suction_cup_bird_feeder bird_feeder_$p $p; done
 for p in mounted mount tray panel lock perch roof roof_bracket; do
   r bird_feeder suction_cup_bird_feeder_modular bird_feeder_modular_$p $p
+done
+for p in mounted camera_mount cam_lock_bar camera_collar collar_pin camera_cradle camera_cap cam_pin upper_mount solar_frame; do
+  r bird_feeder suction_cup_bird_feeder_buddy bird_feeder_buddy_$p $p
 done
 for p in mounted holder adapter mounted_angled; do r phone_holder suction_cup_phone_holder phone_holder_$p $p; done
 for p in mounted half rod nuts brace; do r hat_stretcher hat_stretcher hat_stretcher_$p $p; done
@@ -919,6 +1240,37 @@ for p in mounted half rod nuts brace; do r hat_stretcher hat_stretcher hat_stret
     `roof_side_overhang` its size.
   - **Fit:** `roof_barb` sets how firmly it latches, and `roof_clearance`
     how freely the brackets and rails slide.
+- **Bird Buddy feeder:**
+  - **Camera side:** `buddy_side`. For the -X side, re-export the camera
+    mount with `-D buddy_side=-1`.
+  - **Camera mount:** `cm_cup_top` and `cm_cup_bot` place its cups.
+    `joint_clearance` sets the fit of the collar's tab in the fork.
+    `cbar_clearance` sets how freely the lock bar slides, and `cbar_barb`
+    how firmly it snaps in.
+  - **Camera:** `cam_h`, `cam_w`, `cam_d`, `cam_bump` and the lens and
+    button positions. `cam_clearance` sets how loose it sits in the
+    cradle.
+  - **Magnet:** if the camera doesn't wake in the cradle, move
+    `cam_magnet_from_top` to where its bump is. `cam_magnet_d` and
+    `cam_magnet_t` set the magnet's size.
+  - **Cap:** set `usb_space` to suit the plug (a right-angle plug needs
+    less). `cable_d` sets the cable slot, `cap_cable_side` its side, and
+    `cap_detent` how firmly the cap stays on.
+  - **Camera position:** `cam_lens_y` sets its height, and `cam_x` and
+    `cam_z` where it pivots.
+  - **Turning:** `cam_yaw_step` sets the steps, `spline_clearance` the fit
+    of the teeth, and `cam_yaw` the angle shown in the mounted view.
+  - **Collar:** `collar_h` sets where the camera is held. Lower it only
+    as far as the assert allows (`cam_view_half`). `seat_w` sets the
+    seat's width.
+  - **Lens:** if the camera binds sliding in, raise `cam_lens_proud`.
+  - **Pin:** `lock_pin_clearance` sets how snug the pin is in its posts.
+  - **Panel:** `sp_*`, `jbox_*` and `socket_from_edge`. `sp_clearance`
+    sets the fit in the frame.
+  - **Bolt:** a different bolt length changes `panel_bolt_len`, which
+    re-sizes the upper mount. Check the socket is at least
+    `socket_engage` deep.
+  - **Roof:** `roof_pitch` and `roof_headroom`.
 - **Phone holder:**
   - **Different phone or case:** set `phone_w`, `phone_h`, `phone_t` and
     `phone_corner_r`.
