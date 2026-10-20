@@ -8,8 +8,9 @@ supports.
 |---|---|
 | [`antenna_clamp`](projects/antenna_clamp) | Two-cup bar with a hook clamp for an 8 mm antenna mast |
 | [`box_holder`](projects/box_holder) | One-cup holder with screw-adjusted jaws for a light rectangular object |
-| [`bird_feeder`](projects/bird_feeder) | A reworked suction cup bird feeder, plus a modular in-shell sunflower feeder with optional roof |
+| [`bird_feeder`](projects/bird_feeder) | A reworked suction cup bird feeder, plus a modular in-shell sunflower feeder with optional roof, and a Bird Buddy camera mount for the window or a wooden post |
 | [`phone_holder`](projects/phone_holder) | Shower-screen holder for an iPhone 16 Pro in its case, with a 45° angle adapter |
+| [`tracker_holder`](projects/tracker_holder) | One-cup window holder for a Heltec Wireless Tracker (Meshtastic) enclosure, antenna up, a lock bar for the cup, feet that brace it on the glass and a TPU anti-rattle shim |
 | [`hat_stretcher`](projects/hat_stretcher) | Adjustable oval form with a printed turnbuckle for stretching a flat cap |
 
 Ready-to-print STLs are in each project directory, already in print

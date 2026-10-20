@@ -21,12 +21,31 @@ mushroom-head suction cups:
   off the USB plug. A 165 × 197 mm solar panel, which
   powers the camera over USB, is the roof. It's bolted to a frame on an
   upper mount with one cup.
+- **Bird Buddy on a post:** the Bird Buddy camera screwed to a wooden
+  post or board instead of a window. Its cap carries the solar panel on
+  a ball joint, which tilts and turns the panel and locks it by hand.
 - **Phone holder:** an iPhone 16 Pro in its case (153 × 72 × 11 mm), held
   upright on a shower screen with two suction cups, screen facing out.
   An optional angle adapter turns it 45° so the screen faces left.
+- **Tracker holder:** a Heltec Wireless Tracker (Meshtastic) in a
+  published enclosure, held upright on a window by one suction cup,
+  antenna up and display facing the room. A lock bar keeps the cup's
+  knob in its slot, and two feet at the bottom brace it on the glass.
+  A TPU shim inside stops the case rattling. It's printed in ASA, for a
+  hot car.
 
 Other projects:
 
+- **Card scanner:** our own MTG card scanner. A phone shelf on a
+  telescoping tower holds the camera 130–205 mm above a removable card
+  box, clamped at any height.
+  Cards are stacked face up in the box, and the stack is pushed out
+  through a hole in its floor.
+- **MTG card scanner:** "ScryScanner" by BrownBearDesign (MakerWorld),
+  with its magnet pockets resized for magnets the user has (see
+  **MTG card scanner** below). Also a different scanner,
+  `ScannerV2.3_profile.3mf`, which the user has printed: its card slide
+  with taller side walls.
 - **Hat stretcher:** an adjustable oval form, split front to back and
   spread by a printed turnbuckle, for stretching the band of the user's
   57 cm flat cap. A drop-in brace in each half carries the turnbuckle's
@@ -135,6 +154,8 @@ preview/<name>/        rendered PNGs, one subdirectory per project
     and perch unchanged.
     - **`modular_output`:** the modular file renders its parts only when
       this is true. The variant sets it to false after the include.
+    - **`buddy_output`:** the same for the variant. The post version sets
+      it to false.
     - **Names:** the variant must not reuse a variable or module name from
       the modular file or the library. The intended overrides are
       `part`, `modular_output`, `roof_pitch`, `roof_headroom` and
@@ -149,6 +170,19 @@ preview/<name>/        rendered PNGs, one subdirectory per project
     the modular file inlined (about 66 kB), so it can be opened or
     exported anywhere. Don't edit it. Regenerate it after any change to
     the variant or what it includes (see **Exporting**).
+  - `bird_buddy_post.scad` and
+    `bird_buddy_post_{post_mount,post_cap,ball,stem,ball_ring}.stl`: the
+    Bird Buddy camera on a wooden post. It `include`s the variant, and
+    BOSL2 for the ball joint's thread. It reuses the variant's collar,
+    collar pin, cradle and lock pin; print those from the variant's STLs.
+    - **Names:** new names start `wp_`. The intended overrides are `part`,
+      `buddy_output`, `cam_yaw`, `cam_z`, `cap_down`, `cap_wall_lines` and
+      `cap_eave`.
+    - **Reused parts:** rendered from this file they don't match the
+      variant's STLs. `cam_z` moves the collar, and BOSL2's `cylinder`
+      facets a few of the cradle's circles differently. So the file
+      doesn't offer them as parts, and the fit checks also run against the
+      variant's STLs.
   - `Suction Cup Bird Feeder Mk2.stl`: an incomplete export of the feeder
     (only one keyhole plate). Not used.
 - `projects/phone_holder/`:
@@ -156,11 +190,26 @@ preview/<name>/        rendered PNGs, one subdirectory per project
   - `suction_cup_phone_holder.stl`: the holder, in print orientation.
   - `suction_cup_phone_holder_adapter.stl`: the angle adapter's two
     blocks, in print orientation.
+- `projects/tracker_holder/`:
+  - `suction_cup_tracker_holder.scad`: the tracker holder. Uses
+    `library/BOSL2`.
+  - `suction_cup_tracker_holder.stl`: the holder, in print orientation.
+  - `suction_cup_tracker_holder_lock.stl`: the lock bar, flat.
+  - `suction_cup_tracker_holder_shim.stl`: the TPU anti-rattle shim, flat.
+  - The enclosure itself isn't in the repo. It's "Heltec Tracker LoRa
+    Meshtastic Enclosure V3" on Printables (model 1204874), licensed CC
+    BY-NC, which doesn't fit this repo's CC BY-SA. Download its STLs to
+    run the fit checks against the real case.
 - `projects/hat_stretcher/`:
   - `hat_stretcher.scad`: the hat stretcher. Uses `library/BOSL2` and
     `library/shapes.scad`.
   - `hat_stretcher_{half,rod,nuts,brace}.stl`: exported parts, in print
     orientation. Print the half and the brace twice.
+- `projects/card_scanner/`:
+  - `card_scanner.scad`: the card scanner. Uses `library/shapes.scad`.
+  - `card_scanner_{mast,sleeve,knob,shelf,base,box}.stl`: exported parts,
+    in print orientation. The shelf STL serves all three positions and
+    every height.
 - `preview/<project>/<model>_<part>.png`: a `mounted` view and one image
   per part for each model, made by the commands under **Previews**.
 
@@ -706,6 +755,128 @@ unless the user asks otherwise.
      end's faces are then about 47° from horizontal, still printable.
    - **Frame:** flat, plate on the bed, 250 × 172 mm.
 
+## Bird Buddy on a wooden post: design and why
+
+1. **A file of its own, not a change to the variant.**
+   `bird_buddy_post.scad` includes the Bird Buddy variant and keeps its
+   collar, collar pin, cradle and lock pin, so a camera set up for the
+   window moves across unchanged.
+   - **Mounting (the user's choice):** any flat face of wood, the camera
+     on its side of it, held by wood screws.
+2. **Post mount:** the camera mount's profile (arm, fork, 45° gussets) on
+   a plate `wp_t` (8 mm) thick, `wp_w` (36 mm) wide and about 105 mm tall.
+   - **Screws:** four pan head wood screws (#8 or 4 mm; `wp_screw_d` is
+     the 4.5 mm hole), two above the arm and two below. They sit past the
+     gussets, so a screwdriver reaches them straight on.
+   - **Reach:** `cam_z` is 130 mm here (105 on the window).
+     - **Why:** at 105 the panel's corner hit the wood with the panel
+       turned 45°. At 130 the panel clears the wood at any tilt the ball
+       allows, either way, with its cable edge anywhere within 90° of
+       facing the wood.
+     - **Same collar:** the collar is the same part. Only the arm is
+       longer.
+   - **Camera angle:** nothing on the post mount reaches the cradle, so
+     the camera can face any way, in `cam_yaw_step` steps. The mounted
+     view shows 90°, straight out from the wood.
+3. **Cap (the user asked for it to carry the panel):**
+   - **Thicker:** `cap_wall_lines` is 6 (4 on the window).
+   - **No eaves (the user's call):** `cap_eave` is 0 (8 on the window),
+     because the panel keeps the rain off. The walls run straight up into
+     the 45° roof.
+     - **Why:** the eaves were the hardest part to print. Their
+       undersides are 45°, but the hip corners slope at about 35°, and
+       the eave edge starts as a thin edge in mid-air.
+     - **Same height:** the roof's apex, and so the ball and panel, stay
+       where they were.
+   - **Longer:** `cap_down` is 48.5 (22 on the window). The cap reaches
+     down over the solid part of the cradle's spine and stops just above
+     the collar's lock pin posts. An assert checks it clears them.
+   - **Screws:** two M3 × 10 pan head screws (`wp_cap_screw_len`) go
+     through the back wall, either side of the cable slot, into the spine
+     below its bump channel. Drill 2.5 mm pilots through the cap's holes
+     the first time, so the cradle prints unchanged.
+     - **Why:** the detents only stopped wind lifting a bare cap. The
+       panel's weight and wind need a real fixing.
+   - **Detent grooves:** grooves up the inside of the back wall let the
+     spine's detents slide up to their windows. Without them the wall
+     would have to flex over the detents for 30 mm of travel.
+   - **Load:** the cap still rests on the camera's shoulders. The panel's
+     weight goes to the cradle through the camera and through the screws.
+4. **Ball joint (the user asked for an adjustable angle with a ball
+   joint):**
+   - **Socket:** a threaded boss on the cap's roof holds a bowl for a
+     36 mm ball. The bowl stops just below the ball's equator, so the
+     ball drops in. A drain runs from the bowl's bottom out of the boss's
+     back.
+   - **Thread:** BOSL2 trapezoidal, 46 × 2.5 mm, `thread_angle = 90`
+     (45° flanks), as on the box holder. The bevels are set to the thread
+     depth: BOSL2's default bevel on the ring's internal thread flared it
+     away over nearly its whole length.
+   - **Ring:** it screws down over the boss and grips the ball's upper
+     half, from just above its equator up to `wp_ring_lat` (28°).
+     - **Tilt:** its opening lets the stem tilt 39° (`wp_max_tilt_round`)
+       most ways, but only `wp_max_tilt` (33.5°) toward the stem's keel,
+       which reaches further from the axis. The keel is on the cable-edge
+       side, so the usual tilt, low edge away from the wood, gets the
+       full 39°.
+     - **Heading:** the ball also spins in the socket, so the panel can
+       face any way.
+     - **Modelled clear:** the ring is drawn `wp_ring_clearance`
+       (0.1 mm) off the ball.
+     - **Thread phase:** the ring's thread meshes with the boss's at ring
+       turns of 195–300°; the fit checks use 247.5°.
+   - **Ball and stem, two parts (the user asked for the stem's layers to
+     run along the panel's force):**
+     - **Why two:** in one piece the stem had to print upright with the
+       ball, so the panel's bending pulled its layers apart. The stem
+       now prints on its side, its layers along it.
+     - **Stem:** its cross-section is a teardrop cut flat `wp_keel`
+       (8 mm) below its axis. The flat is the bed face, and the keel keys
+       the stem in the ball. It flares at 45° to a 30 mm plate (D-shaped,
+       cut by the same flat) that bears on the junction box.
+     - **Ball:** the stem's end plugs 13 mm into a keyed pocket in the
+       ball's top (`wp_pocket_floor`, `wp_pocket_clearance`). The ball
+       prints upright. It takes only bearing loads, from the ring, the
+       bowl and the stem in its pocket, and those lie along its layers.
+     - **Bolt:** a steel 1/4"-20 × 2-1/2" flat head screw (82°
+       countersink, `wp_bolt_len`) goes up through the ball and the stem
+       into the panel's socket, `socket_engage` (8 mm) deep, and clamps
+       all three together. Its head sits in a countersink under the
+       ball.
+     - **Ring first:** the plate is smaller than the ring's opening, so
+       the ring slips over the stem before the stem goes into the ball.
+     - **Ball's underside:** cut flat where it reaches 45°. A 45° cone,
+       as on the feeder's knobs, would stick out of the sphere. The first
+       version had one, and it dug 0.6 mm into the bowl, more when tilted.
+   - **Panel limit:** with the cable edge more than about 90° from facing
+     the wood, the panel's long side (108 mm from the socket) reaches the
+     wood. Tilting the cable edge down toward the wood is fine.
+5. **Fitting order:**
+   1. Screw the mount to the wood.
+   2. Fit the collar and the collar pin.
+   3. Put the magnets and the camera in the cradle, and plug in.
+   4. Push the cap on and drive the M3 screws.
+   5. Lower the cradle into the collar and fit the lock pin.
+   6. Put the ring over the stem, plug the stem into the ball, and bolt
+      both to the panel through the ball.
+   7. Set the ball in the socket and screw the ring down.
+6. **Print orientation:**
+   - **Post mount:** on its side, like the camera mount. About
+     90 × 105 mm on the bed, 36 mm tall.
+   - **Cap:** upright, open bottom on the bed. It's the only way the
+     boss's thread and the ball's bowl print. About 55 × 57 mm, 110 mm
+     tall.
+   - **Ball:** upright, on its flat, 29 mm tall.
+   - **Stem:** on its side, keel down, so its layers run along it. About
+     30 × 40 mm on the bed, 23 mm tall.
+   - **Ring:** upside down, its top on the bed, so the face that grips the
+     ball faces up. 56 mm across, 21.5 mm tall.
+7. **Wind (an estimate, not tested):** the panel is about 0.03 m². A
+   20 m/s gust could push on it with roughly 10 N, about 1.5 N·m on the
+   cradle and collar at the panel's height. The window version never
+   carried that. If the cradle rocks in the collar in strong wind, look
+   at that joint first.
+
 ## Phone holder: design and why
 
 1. **Two cups, one above the other, slots opening outward.** The top
@@ -853,6 +1024,130 @@ unless the user asks otherwise.
      weight shears the knob neck across the layers, but that load is small.
      Each block is about 33 × 37 mm on the bed and 22 mm tall.
 
+## Tracker holder: design and why
+
+1. **The case:** "Heltec Tracker LoRa Meshtastic Enclosure V3" on
+   Printables (model 1204874), holding a Heltec Wireless Tracker and a
+   3000 mAh battery. The sizes come from its STLs, not from a printed
+   case.
+   - **Outline:** 50.8 × 82.55 × 27.94 mm, with the front and back edges
+     rounded 6.35 mm and the corners 3.2 mm seen from the front. It's
+     symmetric front to back.
+   - **Antenna end:** the SMA bulkhead (6.35 mm hole) is at mid-depth,
+     12.07 mm off centre (`antenna_x`). The power switch slot is in the
+     same end.
+   - **USB end:** the USB-C notch is centred, at the display edge. The
+     two buttons are on the display face, 8.25 mm either side of centre
+     and 7 mm from this end.
+2. **Upright, antenna up, display into the room:** the case stands on its
+   USB end, so the USB-C plug comes in from below.
+   - **The other way round:** with the display toward the glass, the
+     plug's overmold would hit the back. The holder isn't made for that.
+3. **One cup, slot opening down,** as on the box holder. The holder
+   hangs on the knob, and the case's centre is over the cup.
+   - **Twisting:** a single cup can turn on its knob. The antenna's
+     12 mm offset is the only off-centre load, and it's small.
+   - **Lock bar (the user asked for it):** it slides sideways through a
+     channel across the cup block at head-pocket height, just under the
+     seated head, so a knock from below can't lift the holder off the
+     knob. It's the antenna clamp's bar: a stop head at one end, and
+     two prongs whose barbs snap past the far side of the block.
+     Squeeze the prongs to pull it out.
+     - **Wider cup block:** round the channel, a band of the block
+       spans the flat of the back (±19.05 mm), so the slit prongs sit
+       clear of the slot and the solid bar crosses under the head. An
+       assert checks this. Elsewhere the block is only `block_lines`
+       round the slot. Below the channel the band widens at 45°, so in
+       print it grows out of the narrow block.
+     - **Prongs:** `prong_lines` (6) wide each, `snap_len` (12 mm) long.
+       That's shorter than the antenna clamp's 14 mm, to keep them
+       outside the slot, so they bend about 1.5% at the barb.
+     - **Play:** the head can drop 0.6 mm before it meets the bar (the
+       slot clearance plus the bar's clearance).
+     - **Size:** the bar is about 45 × 6.4 × 3.2 mm.
+   - **Feet (the user asked for a brace near the bottom):** two struts at
+     the bottom corners reach to `foot_gap` (0.5 mm) short of the glass.
+     They stop the holder rocking on the cup when the buttons, which are
+     near the bottom, are pressed.
+     - **Outriggers:** the cup (61 mm) is wider than the holder (55 mm),
+       and it slides in from below. So each foot's pad sits
+       `foot_clearance` (1 mm) past the cup's rim, and its inner edge
+       stays outside the cup's outline in the cross-section.
+     - **Shape:** each foot is a solid XZ profile from the back and the
+       side wall out to a `foot_w` (4 mm) pad, extruded `foot_len`
+       (10 mm) up from the bottom edge. In print it stands on the bed.
+     - **Width:** the feet make the holder 71 mm wide.
+4. **A channel that hugs the case:**
+   - **Cross-section:** the case's outline offset by `clearance` (0.5),
+     plus `shim_space` (2.5 mm) at the back for the shim, with a
+     `wall_lines` (4, 1.62 mm) shell round it. Lips reach `lip`
+     (7.5 mm) in from each side, just past the rounded edge onto the
+     front.
+   - **Clear of the face:** the lips stop at ±17.9 mm. The buttons are at
+     ±8.25 mm, and the display window is within ±8.5 mm.
+   - **Fitting:** the case slides down from the top onto two ledges.
+     `top_open` (15 mm) of it sticks out above the holder, with the
+     antenna and switch, to lift it out by.
+   - **USB gap:** the bottom is open across `usb_gap` (24 mm) in the
+     middle for the plug and cable.
+   - **Shim:** see item 7. Without it the case would have 3.5 mm of play
+     front to back, so the holder isn't meant to be used without it.
+5. **Print orientation:** on its bottom edge, like the phone holder. The
+   whole cross-section lies in each layer, so the case pushing on the
+   lips and the cup pulling on the slot load the layers along their
+   length. About 71 × 48 mm on the bed with the feet, and 71 mm tall.
+   - **Lock bar channel:** in print, its ceiling is a 3.8 mm bridge on
+     each side of the slot, as on the antenna clamp.
+   - **Lock bar:** flat, so its prongs flex along the layers.
+
+6. **ASA, for a hot car (the user's choice):**
+   - **Heat:** ASA's heat deflection temperature (about 95 °C) is above a
+     closed car's cabin in the sun. The loads are small (a case of about
+     150 g), so creep isn't a concern.
+   - **Lightened:** the walls went from 5 lines to 4, as on the phone
+     holder, and the cup block narrowed outside the lock bar's band.
+     That took the holder from 30.7 to 22.8 cm³, about 26% less, without
+     touching the feet, ledges or slot. The feet were 2.8 cm³ of the
+     30.7. Deepening the channel for the shim brought it back to
+     23.6 cm³.
+7. **Anti-rattle shim (the user asked for a thin TPU shim that attaches
+   to the mount):** in a car, the case rattled in its 0.5 mm clearance.
+   - **What it does:** a TPU sheet lines the flat of the channel's back.
+     Four fins on it press the case forward against the lips, and the
+     friction of that stops it moving sideways or up as well.
+   - **Why the channel is deeper:** a shim that fitted the 1 mm of play
+     would have to squash, not flex. `shim_space` (2.5 mm) leaves a
+     3.5 mm gap behind the case for the shim, which is 4 mm thick
+     uncompressed (`shim_preload` 0.5).
+   - **Fins, not ribs:** the first version had solid trapezoid ribs.
+     Squashing them 0.5 mm along their length came to roughly 2,000 N,
+     so it was changed before printing.
+     - **Shape:** each fin is `fin_t` (0.9 mm, 2 lines) thick and leans
+       outward at 45° from the sheet, so the case bends it down. Two
+       lean each way, so they don't push the case sideways.
+     - **Force:** a beam estimate gives about 12 N at the default
+       preload, at about 5% strain at the root. TPU's stiffness varies
+       a lot between filaments, so it could be 10–25 N. The phone
+       holder's 6 N was easy to slide; 10 N was hard with a soft case.
+   - **Holding it:** the shim stands on the ledges. Two diamond studs on
+     the channel's back (`stud_x`, `stud_up`) snap into diamond holes
+     near its bottom, so the case can't drag it up.
+     - **Studs:** their top halves are cut back at 45° from the back, a
+       ramp the shim's bottom edge rides up as it slides down. Their
+       flat bottom faces hold it.
+     - **Lips:** the shim is wider than the gap between the lips, so it
+       can't fall out forward when the case is out.
+     - **Fins:** they stop above the studs, so the studs' holes stay
+       clear.
+   - **Fitting:** slide the shim down from the top, fins out, until it
+     clicks onto the studs, then slide the case in. The fins' top ends
+     slope down as a lead-in. To remove the shim, lift its bottom edge
+     off the studs through the gap at the bottom.
+   - **Print orientation:** flat, its plain back on the bed. The fins'
+     undersides are 45° overhangs, which print without support.
+   - **Heat:** TPU is fine at car temperatures, but compression set
+     grows with heat. If the grip fades, raise `shim_preload`.
+
 ## Hat stretcher: design and why
 
 1. **Made for a flat cap,** 57 cm. The user chose an adjustable form
@@ -959,6 +1254,241 @@ unless the user asks otherwise.
       the thrust runs along the layers. About 83 × 83 mm, 29 cm³ (37 g of
       PETG).
 
+## Card scanner: design and why
+
+1. **Stack in the box (the user's choice over a ramp):** each card is laid
+   face up on the stack in an open box, under the camera.
+   - **Why:** no ramp, least material, and the box walls keep the cards
+     aligned.
+   - **Unloading:** lift the box out and push the stack up through the
+     hole in its floor (the user asked for this).
+2. **Height (the user asked for it adjustable):** `cam_h` is measured
+   from a full stack (the box's rim) to the lens (the user's choice). It
+   can be set anywhere from `cam_lo` (130 mm) to `cam_hi` (205 mm).
+   - **History:** it was a fixed 203.2 mm (8 in), the user's first ask,
+     past the iPhone main camera's close-focus distance. The user found
+     that too tall, and chose the range.
+   - **Shelf top:** 181.4–256.4 mm.
+   - **`bump_proud`:** 0, because with a case whose camera ring is flush
+     the lens sits at the case's back.
+3. **Phone:** screen up, its top end (the lenses) toward the front over
+   the box, and its body back over the tower (the user's choice).
+   - **Shelf length (the user asked for this):** `shelf_len` is 120 mm.
+     The rest of the phone hangs off the front, so any phone with its
+     lenses at the top works. The screen reads upside down from the front.
+   - **Defaults:** the iPhone 16 Pro in its case (153 × 72 × 11 mm). Its
+     main lens, at the top right of the face, is taken as 16.5 mm from
+     the top and side edges (`lens_from_top`, `lens_from_side`, estimates).
+     The box is centred `box_dx` (2.6 mm) in front of it (see item 8).
+   - **Other phones:** the lens lands `phone_l - shelf_len -
+     lens_from_top` past the shelf's front edge. A different phone moves
+     it a little front to back, which the camera's wide view absorbs.
+   - **Locating:** a back stop at the phone's bottom end, and side lips
+     `phone_w` plus clearance apart.
+   - **No platform (the user's call):** the phone lies on three rails.
+   - **History:**
+     - The first version had the top end toward the tower.
+     - The second had a notch in the shelf under the camera and the
+       shelf in one piece with the tower.
+4. **Box:** for the largest card, a double-sleeved 67 × 93 mm, plus
+   `card_clearance` (1.5 mm) a side. Inside it's 96 × 70 × 50 mm, with
+   3-line walls.
+   - **Push-out hole:** 74 × 50 mm. Sized so an unsleeved card anywhere in
+     the box still rests `floor_overlap` (3 mm) on the floor each side.
+   - **Vents (the user asked for them):** pointed slots, 4 × 20 mm, round
+     the bottom of all four walls. They let air out from under a
+     dropping card, so it settles faster. The table closes the floor's
+     hole, so it doesn't vent.
+5. **Tower (the user asked for it centred on the base, with the shelf
+   separate, and then for its height to be adjustable):** a mast that
+   slides in a sleeve, clamped by an M3 thumbscrew. The user chose a
+   clamp and a scale over index holes, so any height works, and asked
+   for parts printed, apart from M3 screws and nuts. Magnets aren't used,
+   because a magnet detent can't hold between steps.
+   - **Sleeve:** a U-channel round the mast, 6-line walls, its floor
+     toward the box and its mouth at the back (-X).
+     - **Lips:** at the mouth, they cover 45° chamfers (`mast_chamfer`,
+       3.5 mm) on the mast's back corners, so the mast can't come out
+       backward.
+     - **Bottom stop:** a crossbar across the U at its foot. The mast
+       rests on it at `cam_lo`.
+     - **Foot:** it presses into the base's socket and stands on a 45°
+       ledge 12 mm up.
+     - **Top:** 2 mm under the shelf at `cam_lo`.
+     - **Overlap:** at `cam_hi`, 74 mm of mast stays in the sleeve; an
+       assert keeps at least 55.
+   - **Clamp:** an M3 bolt in a boss on the sleeve's +Y wall, 10 mm below
+     its top (`clamp_down`). It threads through a captive nut and presses
+     the mast against the far wall.
+     - **Nut slot:** opens through the mouth (up in print), its walls on
+       the nut's flats.
+     - **Bolt hole:** pointed toward the mouth.
+     - **Bolt:** M3 × 12 to 20, socket head, with the printed knob
+       pressed on. The knob is 14 mm across, so at `cam_lo` it clears the
+       shelf; an assert checks it.
+   - **Mast:** the truss column, two chords 30 mm apart with 4-line
+     diagonals, 24 mm across, sliding with `sleeve_clearance` (0.2 mm) a
+     face.
+     - **Back chord:** `clamp_chord` (10 mm) wide, so the bolt always
+       bears on solid chord, on the flat beside the chamfer. The front
+       chord is 6 lines.
+     - **Scale:** engraved 0.5 mm into the back chord, read from behind
+       at the sleeve's top edge. A tick every 5 mm, longer every 10, and
+       numbers (the lens-to-stack distance) every 25 and at 130.
+   - **Top:** a solid tenon, `tenon_w` (16 mm) across, flush with the
+     column's -Y face.
+     - **Why narrower:** the three pockets are only 19.5 mm apart, so a
+       full-width tenon would leave no walls between them.
+     - **Why flush:** that face is on the bed in print, so the tenon
+       needs no overhang.
+6. **Shelf, three positions (the user asked for left, centre and right):**
+   - **Mounting (the user asked for all four walls, for friction):**
+     three pockets under the shelf, each walled on all four sides with a
+     ceiling. The tenon presses into one, so the shelf sits at
+     `shelf_pos` × `shelf_off` across.
+   - **Offsets:** `shelf_off` is `phone_w / 2 - lens_from_side` (19.5 mm),
+     so the lens comes over the box's centre.
+     - **Right (+1):** lenses at the top right of the face (iPhone).
+     - **Centre (0):** lenses in the middle.
+     - **Left (-1):** lenses at the top left.
+   - **Held:** the press fit on all four sides holds it on, and the
+     pocket stops it moving any way.
+   - **Structure:** three rails, 14 mm deep: one under each lip and one
+     down the middle. The rails and crossbars make a closed box frame.
+     - **Back:** the back stop runs down to the rails' bottoms and ties
+       their back ends.
+     - **Front:** a crossbar, flush with the rails' tops, ties their
+       front ends (the user asked for the closed frame).
+     - **Middle:** a shell round each pocket (3.5 mm ceilings), with
+       its front and back walls carried across the full width to the
+       outer rails.
+7. **Press fits (the user asked for them):** the sleeve's foot in its socket and
+   the tenon in its pocket are drawn size for size on all four sides
+   (`socket_clearance` and `pocket_clearance` are 0). A 45° lead-in, `lead_in` (1 mm), at
+   each mouth starts them.
+   - **Tuning:** raise the clearance if a joint won't push home, or make
+     it negative if it's loose.
+   - **History:** the shelf first had a channel open at both ends, and a
+     ridge on the tenon in V grooves, so only two faces gripped.
+8. **Base:** two rails and three crossbars, 10 mm high, and the sleeve's
+   socket, centred behind the box. The socket is 25 mm deep
+   (`socket_depth`), because the sleeve's lever is longer than the old
+   tower foot's.
+   - **Box offset:** the sleeve's floor sits where the socket wall used
+     to be. So the box, its frame and the front crossbar move `box_dx`
+     (the floor plus its clearance, 2.6 mm) forward. The mast and shelf
+     stay where the fixed tower had them, so the shelf printed for it
+     still fits, and the lens is 2.6 mm behind the box's centre.
+   - **Rails:** they run back under the phone's bottom end, so pressing
+     either end of the phone can't tip the scanner. Crossbars tie them
+     at the back end, behind the box and in front of it.
+   - **Box:** it stands on the table inside the frame and lifts out.
+9. **Print orientation:**
+   - **Mast:** on its side, -Y down. The column is a 2D side profile
+     extruded up from the bed, so it bends along the layers. The
+     chamfer on the bed edge is a 45° overhang. About 162 × 30 mm on the
+     bed, 24 mm tall.
+   - **Sleeve:** on its floor, mouth up, so its bending also runs along
+     the layers. The lips lean in at 45°, and the clamp boss's lower end
+     is cut back at 45° to the wall. About 153 × 34 mm on the bed, 33 mm
+     tall.
+   - **Knob:** flat, head pocket up.
+   - **Shelf:** right side up, standing on its rails, crossbars and
+     pocket walls.
+     - **Bridges:** its only bridges are the pockets' ceilings, 16 × 30 mm
+       each (the user's printer bridges well).
+     - **Size:** about 123 × 76 mm, 18 mm tall.
+   - **Base and box:** flat, as mounted.
+   - **Plastic:** about 56, 38, 29, 29 and 23 cm³ (mast, sleeve, shelf,
+     base, box), and under 1 cm³ for the knob.
+10. **Camera's view:** a cone from the lens to the largest card on the box
+   floor clears every part and the phone, at every height.
+
+## MTG card scanner: design and why
+
+1. **Someone else's design, not committed.** `ScryScanner.3mf` (Bambu
+   Studio) is under MakerWorld's Standard Digital File License, which
+   doesn't allow sharing the files or derivatives. The project's
+   `.gitignore` keeps every `.3mf` and `.stl` out of git; only
+   `scry_scanner_magnets.scad` and `scry_3mf.py` are ours.
+2. **Magnets the user has:** 3 × 1, 10 × 3 and 18 × 2 mm discs.
+   - **Lid and body top:** the original's 15 × 2 mm discs become
+     18 × 2 mm. The new pockets cover the old ones, at y 83.75 instead
+     of 83.5 to even out the walls.
+   - **Tray insert and the body's tray cavity:** the original's
+     20 × 5 × 2 mm bars become one 10 × 3 mm disc per bar, about the same
+     volume. There are four: one in each end face of the insert, and one
+     in each end wall of the cavity (the second, at y = -21.25, is beside
+     the column storage holes). The old slots are filled and a round
+     pocket, pointed at the top for printing, is cut at each slot's
+     centre.
+   - **Walls:** at least 1.73 mm round the pockets (1.86 mm outside the
+     disc pockets that replace the bars).
+3. **Workflow:** `scry_3mf.py extract ScryScanner.3mf original` writes the
+   parts' meshes in their own coordinates. The .scad imports them and
+   edits only the pockets. Its `column` and `column_2` parts are the
+   lid's two support dowels, imported unchanged; they render the same
+   triangle sets as the originals. `scry_3mf.py replace` writes
+   `ScryScanner_magnets.3mf` with the edited meshes, keeping the plates
+   and print settings.
+4. **Lightening (the user asked for less material):** `lighten_body`
+   hollows the body, leaving every outside face, hole and socket as it
+   was. The phone on the lid is the only load, carried by the columns
+   into the end block.
+   - **Where:** one void under the card ramp, its 45° gable roof
+     following the ramp's 15° slope `skin_t` (3 mm) under it, and one in
+     the column end block. Walls are `wall_lines` (8). With
+     `open_bottom` they open through the underside.
+   - **Why this layout:** the user prints with 2 perimeters and 10%
+     infill (0.45 mm lines, 0.2 mm layers). At that infill a void only
+     saves filament if it removes more infill than the perimeters and
+     skins it adds. A voxel estimate for the body gave about 164 g as
+     printed, 145 g for one open void, 148 g for two, 156 g for one
+     closed and 172 g for four closed channels.
+   - **Lid:** pockets under a 2 mm phone face added about 4 g, so
+     `lighten_lid` is off.
+   - **Outputs:** `scry_scanner_light_body.stl` and
+     `ScryScanner_light.3mf` (light body, magnet-only lid and insert).
+     The magnet-only body needs `-D lighten_body=false`.
+5. **Checks:** differencing each edited part against the original leaves
+   only the pocket regions (and, when lightened, the voids). The new pockets add no overhangs. To find
+   every slot, search sections along all three axes for slot-sized loops
+   of any vertex count. A first scan for 4-vertex loops missed the second
+   bar slot in each part.
+6. **Scanner V2.3 (`ScannerV2.3_profile.3mf`):** a different scanner,
+   also not ours and not committed. It's a tower: a base plate, a frame,
+   and a 2 mm phone platform on top (y 63–65), with a card slide and two
+   card boxes. `scanner_v2_extension.scad` and `scanner_v2_3mf.py` are
+   ours.
+   - **Extracting:** `scanner_v2_3mf.py extract ScannerV2.3_profile.3mf
+     original_v2` writes `v2_{scanner,slide,box_sleeved,box_unsleeved}.stl`
+     in their own coordinates, which are the assembled orientation, +Y up.
+     This 3MF keeps each mesh in its own file, so `scry_3mf.py` can't
+     read it.
+   - **Raising the phone (the user asked for about 50 mm more, for
+     focus):** two attempts, both set aside for the new card scanner.
+     - **Riser:** a snap-on cap over the platform. The user found it not
+       sturdy enough, and it was removed.
+     - **Stretched body (`part="body"`, unfinished):** the frame between
+       y 22 (above the slide slot, y 4.8–15.2) and the platform is
+       stretched 2.22× up Y. It stays braced, but the long diagonal rods
+       then print at about 12° from the bed, and the overhang area grows
+       from about 525 to 1710 mm² in the stretched zone. Not exported.
+   - **Slide (the user asked for higher edges so cards don't fall off):**
+     the 2 mm rails are raised to `slide_wall_h` (10 mm) above the ramp.
+     - **Print:** on its edge, -X on the bed, as in the original 3MF. The
+       layer lines then run down the ramp, along the cards' path.
+     - **-X wall:** square to the ramp, solid down to the bed.
+     - **+X wall:** at the top of the print a square wall would be a
+       ceiling, so it leans out at 45° from the old rail's top inner
+       corner. The slide is then 112 mm wide at the wall tops instead of
+       101.
+     - **Lane:** unchanged at the ramp: 92 mm, and 94 mm at the old rails'
+       tops. The rails' own 2:1 sloped inner faces are the original's.
+     - **Unknown:** how the slide sits on the scanner or box wasn't
+       worked out, so the wider top hasn't been checked against them.
+   - **Outputs:** `scanner_v2_slide.stl`, in print orientation.
+
 ## Verification workflow
 
 Run these checks after any geometry change. OpenSCAD on this machine is
@@ -988,14 +1518,29 @@ PNG previews need the sandbox disabled, or OpenSCAD writes nothing.
      flats in the upper mount. In the upper mount, which prints
      tilted 15°, each flat shows up twice. There are also some zero-area
      slivers. The collar, cradle, cap, pins and frame have none.
+   - **Bird Buddy on a post:** a 0.03 mm² sliver at the cap's inner
+     ridge, and a zero-area sliver along the stem's bolt hole. The post
+     mount, ball and ring have none.
    - **Phone holder angle adapter:** the 1.8 mm and 4.2 mm cup slot flats in
      each block, and a 0.02 mm² point at each knob tip.
+   - **Tracker holder:** the 3.8 mm ceiling of the lock bar channel
+     (11.5 mm long each side of the slot), the 1.8 mm and 4.2 mm flats
+     at the cup slot's pointed end, and some zero-area slivers (also
+     where the cup block's band starts to widen). The feet and the shim
+     studs have none (the studs' sides are at 45°), and neither does the
+     lock bar. The shim has none: its fins' undersides are at 45°.
    - **Phone holder:** the 1.8 mm and 4.2 mm flats at the bottom cup
      slot's pointed end, plus a sliver of facets at about 48° where the
      neck slot's circle meets its 45° point (a `$fn` artifact).
    - **Screw, nut and jaw:** none.
    - **Hat stretcher:** none (one degenerate sliver in the chamfer). The
      brace has none.
+   - **Card scanner:** none on the sleeve, knob, base or box. On the mast,
+     only the 0.5 mm-deep ceilings in the engraved scale. On the shelf,
+     only the three pocket ceilings, 16 × 30 mm bridges.
+   - **Scanner V2.3 slide:** only the original's +X
+     rail inner face (1 × 70 mm at 63°, which the original has too) and
+     zero-area slivers.
 4. **Fit checks:** intersect the parts at each pose. Pass `part="none"` with
    `-D`, because an assignment before `include` gets overwritten.
    - **Antenna cap path:** the 2D `cap2d()` against `clamp_body2d()` plus the
@@ -1099,6 +1644,40 @@ PNG previews need the sandbox disabled, or OpenSCAD writes nothing.
        moved deeper or off the glass.
      - The lock bar pulled 0.5 mm up (the barbs catch) or pushed 0.5 mm
        down (the head stops).
+   - **Bird Buddy on a post, poses that must be clear:**
+     - **Which collar and cradle:** run these with them rendered and
+       again with them imported from the variant's STLs.
+     - **Clear:** measure each intersection's volume. Faces that only
+       touch, like the collar pin's head on the fork, leave a
+       zero-thickness result.
+     - **Post mount:** against the collar and pins, and the wood (0.01 mm
+       off).
+     - **Turning:** at every 22.5° of camera angle, the cradle (0.05 mm
+       up, as it rests on the seat), camera, magnet, plug, cap, cap screws
+       and ring, against the post mount, collar, pins and wood.
+     - **Cap:** at rest (0.03 mm up) and lowered on from 5, 15 and 30 mm,
+       against the camera and cradle. The cap screws against the camera
+       and magnet.
+     - **Ring:** on the boss, turned 247.5° so the threads mesh, against
+       the cap, camera and cradle. Passing over the stud (ball and stem),
+       5–45 mm up its axis.
+     - **Stem in the ball:** seated (0.01 mm up) and sliding in from 5
+       and 10 mm.
+     - **Stud:** at tilts of -33 to 38° (the keel side is negative) in
+       eight headings, against
+       the ring and cap.
+     - **Panel:** the panel and stud at camera angles of 0, 90, 180 and
+       270°, tilts of -33 to 38° and headings of -90 to 90° in 15° steps,
+       against everything else and the wood.
+     - **Screwdriver:** a pan head and a 6 mm shank, 150 mm out from each
+       wood screw, against the post mount.
+   - **Bird Buddy on a post, poses that must overlap:**
+     - The stud moved 0.3 mm down, up or sideways.
+     - The stem moved 0.3 mm sideways or toward its keel, or turned 5°,
+       in the ball's pocket (the key).
+     - The cap moved 0.3 mm down (it rests on the camera).
+     - The ring turned 120° from its mesh (the threads engage).
+     - The cap screws against the cradle (they bite into the spine).
    - **Phone holder, poses that must be clear:** with `fin_preload =
      -0.05`, the phone seated (0.01 mm up and back) and lowered in from
      10, 40, 80 and 150 mm above; each cup knob at rest, and swept 60 mm
@@ -1118,6 +1697,31 @@ PNG previews need the sandbox disabled, or OpenSCAD writes nothing.
      holder moved 0.5 mm along y, sideways or off the face; the blocks
      moved 0.5 mm down, sideways or off the cups; a knob moved 0.5 mm
      deeper, sideways or off the glass.
+   - **Tracker holder, poses that must be clear:**
+     - The real enclosure (its three body STLs, moved into the holder's
+       frame) seated 0.01 mm up, and lifted 10, 30, 60 and 85 mm.
+     - A 13 × 7.5 mm USB-C plug, 30 mm long, under the USB notch.
+     - The cup knob at rest. The neck and head swept 10, 25, 45 and 60 mm
+       out of the bottom, each hulled separately. The cup body at rest
+       and slid the same distances, and swept 80 mm out as one hull.
+       The glass, and the glass moved 0.4 mm up (inside `foot_gap`).
+     - The case is modelled pressed against the lips, so its clear poses
+       are offset 0.01 mm back.
+     - The shim seated (0.01 mm up), and lowered in from 5, 20, 40 and
+       60 mm above with `stud_h = 0`. The case against the shim with
+       `shim_preload = -0.05`, seated and lifted 10, 30 and 60 mm.
+     - The lock bar in its channel, against the holder and the seated
+       knob. The bar sliding in from 5, 15, 30 and 45 mm out, with
+       `snap_barb = -0.05`.
+   - **Tracker holder, poses that must overlap:** the case moved 0.5 mm
+     down, 0.6 mm sideways, 0.5 mm toward the glass or 1.2 mm forward
+     (the lips); the knob moved 0.5 mm up, sideways or off the glass;
+     the knob moved 0.8 mm down onto the lock bar; the glass moved
+     0.6 mm up (the feet); the shim against the case at the default
+     preload (the fins); the shim moved 0.5 mm up or sideways (the
+     studs) or down (the ledges); the shim moved 31 mm forward (the
+     lips); the bar moved 0.5 mm
+     in (the stop head), out (the barbs), or along y or z in its channel.
    - **Hat stretcher, poses that must be clear:** the two halves at 0, 7,
      14, 21 and 28 mm spread; the rod (plain cylinders for the threads,
      plus the wheel) against each half at each spread; the nuts (plain
@@ -1134,6 +1738,38 @@ PNG previews need the sandbox disabled, or OpenSCAD writes nothing.
      0.5 mm sideways (the fins), or closed past zero; the rod's wheel with
      the halves closed past zero; a nut moved 0.5 mm back, sideways or out
      of its slot's closed side.
+   - **Card scanner, poses that must be clear:**
+     - **Press fits:** run these with `socket_clearance` and
+       `pocket_clearance` at 0.05. At 0 a seated part only touches,
+       with zero volume.
+     - The sleeve in its socket (0.01 mm up), and lowered in from 5 and
+       13 mm.
+     - The mast resting on the sleeve's stop (0.01 mm up), and lowered
+       in from 90 and 180 mm. The nut in its slot.
+     - The box in the frame (0.01 mm up), and slid forward 60 and 140 mm
+       at 11 mm up, against the base and sleeve.
+     - At `cam_h` 130, 167.5 and 205:
+       - the mast in the sleeve; the bolt against the sleeve; the knob
+         against the sleeve, mast and base;
+       - the box lifted 11 and 100 mm against the sleeve, mast, shelf and
+         knob;
+       - at each `shelf_pos` (-1, 0, 1), the shelf (0.01 mm up) against
+         the mast, sleeve, base, knob and bolt, and the phone on the
+         shelf (0.01 mm up);
+       - the view cone (lens, 0.2 mm down, to the largest card on the
+         box floor) against every part and the phone.
+   - **Card scanner, poses that must overlap:**
+     - At each of those heights, the mast moved 0.5 mm along X (the floor
+       and the lips) or Y (the walls), and the bolt 0.1 mm further in
+       (it bears on the mast). At `cam_lo`, the mast moved 0.5 mm down
+       (the stop).
+     - The sleeve moved 0.3 mm along X or Y (with `socket_clearance` 0),
+       or 0.5 mm down.
+     - The box moved 0.7 mm along X or Y.
+     - At each `shelf_pos`, the shelf moved 0.3 mm each way along X and Y
+       (all four pocket walls), or 0.3 mm down.
+     - The phone moved 0.7 mm back (the stop), sideways (the lips) or
+       down.
    - **Bird feeder diff:** `difference()` the new feeder and the original
      both ways. The only pieces left should be at the towers, the window
      and rail block, and the ridges.
@@ -1196,13 +1832,26 @@ for p in camera_mount cam_lock_bar camera_collar collar_pin camera_cradle camera
   openscad -o suction_cup_bird_feeder_buddy_$p.stl -D "part=\"$p\"" suction_cup_bird_feeder_buddy.scad
 done
 ../../library/flatten_scad.py suction_cup_bird_feeder_buddy.scad suction_cup_bird_feeder_buddy_complete.scad
+for p in post_mount post_cap ball stem ball_ring; do
+  openscad -o bird_buddy_post_$p.stl -D "part=\"$p\"" bird_buddy_post.scad
+done
 cd ../phone_holder
 openscad -o suction_cup_phone_holder.stl -D 'part="holder"' suction_cup_phone_holder.scad
 openscad -o suction_cup_phone_holder_adapter.stl -D 'part="adapter"' suction_cup_phone_holder.scad
+cd ../tracker_holder
+openscad -o suction_cup_tracker_holder.stl -D 'part="holder"' suction_cup_tracker_holder.scad
+openscad -o suction_cup_tracker_holder_lock.stl -D 'part="lock"' suction_cup_tracker_holder.scad
+openscad -o suction_cup_tracker_holder_shim.stl -D 'part="shim"' suction_cup_tracker_holder.scad
 cd ../hat_stretcher
 for p in half rod nuts brace; do
   openscad -o hat_stretcher_$p.stl -D "part=\"$p\"" hat_stretcher.scad
 done
+cd ../card_scanner
+for p in mast sleeve knob shelf base box; do
+  openscad -o card_scanner_$p.stl -D "part=\"$p\"" card_scanner.scad
+done
+cd ../mtg-card-scanner
+openscad -o scanner_v2_slide.stl -D 'part="slide"' scanner_v2_extension.scad
 cd ../..
 ```
 
@@ -1227,8 +1876,14 @@ done
 for p in mounted camera_mount cam_lock_bar camera_collar collar_pin camera_cradle camera_cap cam_pin upper_mount solar_frame; do
   r bird_feeder suction_cup_bird_feeder_buddy bird_feeder_buddy_$p $p
 done
+for p in mounted post_mount post_cap ball stem ball_ring; do
+  r bird_feeder bird_buddy_post bird_buddy_post_$p $p
+done
 for p in mounted holder adapter mounted_angled; do r phone_holder suction_cup_phone_holder phone_holder_$p $p; done
 for p in mounted half rod nuts brace; do r hat_stretcher hat_stretcher hat_stretcher_$p $p; done
+for p in mounted mast sleeve knob shelf base box; do r card_scanner card_scanner card_scanner_$p $p; done
+r card_scanner card_scanner card_scanner_mounted_low mounted cam_h=130
+for p in mounted holder lock shim; do r tracker_holder suction_cup_tracker_holder tracker_holder_$p $p; done
 ```
 
 ## Tuning notes for the user
@@ -1290,6 +1945,24 @@ for p in mounted half rod nuts brace; do r hat_stretcher hat_stretcher hat_stret
     re-sizes the upper mount. Check the socket is at least
     `socket_engage` deep.
   - **Roof:** `roof_pitch` and `roof_headroom`.
+- **Bird Buddy on a post:**
+  - **Reach:** `cam_z`. Below 130 it limits which ways the panel can face.
+  - **Wood screws:** `wp_screw_d` sets the hole and `wp_screw_x` their
+    spacing.
+  - **Cap screws:** `wp_cap_screw_d`, `wp_cap_screw_len` and
+    `wp_cap_screw_down`. The asserts keep them in the solid part of the
+    spine.
+  - **Ball joint:**
+    - **Grip:** if the ring won't clamp the ball, lower
+      `wp_ring_clearance`. If it binds on the boss, raise
+      `wp_thread_slop`.
+    - **Range:** `wp_ring_lat` trades grip for tilt range
+      (`wp_max_tilt`, `wp_max_tilt_round`). A smaller `wp_keel` gives
+      more tilt toward the keel but a narrower flat on the bed.
+    - **Bolt:** a different bolt changes `wp_bolt_len`, which moves the
+      stem's plate.
+  - **Mounted view:** `wp_panel_tilt` and `wp_panel_heading` pose the
+    panel, and `cam_yaw` the camera.
 - **Phone holder:**
   - **Different phone or case:** set `phone_w`, `phone_h`, `phone_t` and
     `phone_corner_r`.
@@ -1306,6 +1979,25 @@ for p in mounted half rod nuts brace; do r hat_stretcher hat_stretcher hat_stret
   - **Angle adapter:** `adapter_angle` sets the turn. If the holder's
     corner touches the glass or a cup, raise `adapter_z`. If the holder
     is loose or tight between the rails, adjust `rail_clearance`.
+- **Tracker holder:**
+  - **Fit:** if the case is tight or rattles in the channel, adjust
+    `clearance`.
+  - **Different enclosure:** set `case_w`, `case_h`, `case_t`,
+    `case_edge_r` and `case_corner_r`. Keep `lip` past the rounded
+    edge (an assert checks it).
+  - **USB plug:** if a bulky plug doesn't fit, widen `usb_gap`.
+  - **Lock bar:** `lock_clearance` sets how freely it slides, and
+    `snap_barb` how firmly it snaps in.
+  - **Feet:** `foot_gap` sets how close they come to the glass. If they
+    touch the cup's rim or tab, raise `foot_clearance`.
+  - **Thickness:** `wall_lines` (4) sets the back, walls and lips.
+  - **Shim grip:** if the case is hard to slide in, lower
+    `shim_preload`; if it still rattles, raise it. `fin_t` also changes
+    the stiffness, steeply. Only the shim needs reprinting for either.
+  - **Shim on its studs:** if it's hard to get onto the studs, lower
+    `stud_h`; if it's loose on them, lower `stud_clearance`.
+  - **Height:** `top_open` sets how much of the case sticks out above
+    the holder.
 - **Hat stretcher:**
   - **Size:** `closed_circ` must be a little under the hat's size;
     `stretch` sets how far it opens (circumference grows by twice it).
@@ -1317,5 +2009,28 @@ for p in mounted half rod nuts brace; do r hat_stretcher hat_stretcher hat_stret
   - **Brace:** if it's hard to push onto the nut block, or falls out, adjust
     `brace_side_clearance`. If it won't drop in past the oval wall, raise
     `brace_clearance`. Move the feet with `brace_feet` if the vents change.
+- **Card scanner:**
+  - **Phone:** set `phone_l`, `phone_w`, `lens_from_top` and
+    `lens_from_side`. `shelf_pos` picks the shelf position for the
+    lenses' side; the shelf STL has all three grooves.
+  - **Shelf:** `shelf_len` sets how much of the phone it carries. If the
+    camera bump stands proud of the case, set `bump_proud` and shorten
+    `shelf_len` so the bump hangs past the front edge.
+  - **Height:** loosen the knob, slide the mast and read the scale at
+    the sleeve's top: it gives the lens-to-card distance with the box
+    full. `cam_lo` and `cam_hi` set the range (the sleeve and mast are
+    sized from them), and `cam_h` only poses the mounted view.
+    `box_depth` sets the box's capacity.
+  - **Clamp:** if the mast is stiff or loose in the sleeve, adjust
+    `sleeve_clearance`. If the knob slips on the bolt head, lower
+    `head_press` or add a drop of glue. A longer bolt only moves the
+    knob out; `bolt_len` poses it.
+  - **Cards:** `card_w`, `card_l` and `card_clearance` size the box.
+  - **Vents:** `vent_h`, `vent_w` and `vent_gap`.
+  - **Fit:** `box_clearance` (box in frame). The press fits are
+    `socket_clearance` (sleeve in socket) and `pocket_clearance` (shelf on
+    the tower): raise them if too tight, lower them (negative) if loose.
+- **Scanner V2.3:**
+  - **Slide:** `slide_wall_h` sets the walls' height above the ramp.
 - **Box holder object:** if your object is a fixed size, set `obj_t_max` to
   its thickness so the lips sit right at its front face.
