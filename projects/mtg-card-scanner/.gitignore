@@ -1,0 +1,7 @@
+# ScryScanner is under MakerWorld's Standard Digital File License, which
+# doesn't allow sharing the files or derivatives. Keep its meshes (original
+# and edited) out of this CC BY-SA repo; only the .scad and script are ours.
+*.3mf
+*.stl
+original/
+original_v2/
