@@ -263,6 +263,9 @@ layer_h = 0.28;
 
 /* [Hidden] */
 modular_output = false;
+// Render the parts below. A file that includes this one sets it to false
+// after the include and renders its own.
+buddy_output = true;
 
 // ---------- derived values ----------
 // Wall thickness of n perimeter lines: the slicer overlaps neighbouring
@@ -825,7 +828,7 @@ module upper_mount_print()
         rotate([-roof_pitch, 0, 0]) translate([0, -Y0, -roof_back_z]) upper_mount();
 module solar_frame_print() rotate([90, 0, 0]) solar_frame_local();
 
-if (part == "mounted") {
+if (buddy_output && part == "mounted") {
     color("silver") mount();
     translate([0, -tray_drop, 0]) {
         tray();
@@ -853,7 +856,7 @@ if (part == "mounted") {
     }
     for (s = [-1, 1])
         %translate([s * cup_x, 0, glass_z]) cylinder(d1 = cup_d, d2 = 20, h = cup_standoff);
-} else {
+} else if (buddy_output) {
     mirror([mside, 0, 0]) {
         if (part == "camera_mount") camera_mount_print();
         if (part == "camera_collar") camera_collar_print();
