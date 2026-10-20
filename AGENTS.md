@@ -46,6 +46,9 @@ Other projects:
   **MTG card scanner** below). Also a different scanner,
   `ScannerV2.3_profile.3mf`, which the user has printed: its card slide
   with taller side walls.
+- **Pocket utility knife:** "Utility Knife F1 Gen2" (Printables
+  1104014), with its lettering filled and a third blade stop that leaves
+  the tip about 3 mm out, for box cutting.
 - **Hat stretcher:** an adjustable oval form, split front to back and
   spread by a printed turnbuckle, for stretching the band of the user's
   57 cm flat cap. A drop-in brace in each half carries the turnbuckle's
@@ -205,6 +208,15 @@ preview/<name>/        rendered PNGs, one subdirectory per project
     `library/shapes.scad`.
   - `hat_stretcher_{half,rod,nuts,brace}.stl`: exported parts, in print
     orientation. Print the half and the brace twice.
+- `projects/pocket-utility-knife/`:
+  - `{Bottom,Top,Slide} - 0.4 PETG or PC.stl`: the original parts. Don't
+    change them.
+  - `pocket_utility_knife.scad`: imports them and edits the Bottom.
+  - `pocket_utility_knife_{bottom,top,slide}.stl`: exported parts, in the
+    originals' print orientation. The top and slide are the originals
+    unchanged.
+  - **Not committed:** the project's `.gitignore` keeps every `.stl` and
+    `.3mf` out of git, because the design's licence hasn't been checked.
 - `projects/card_scanner/`:
   - `card_scanner.scad`: the card scanner. Uses `library/shapes.scad`.
   - `card_scanner_{mast,sleeve,knob,shelf,base,box}.stl`: exported parts,
@@ -1254,6 +1266,50 @@ unless the user asks otherwise.
       the thrust runs along the layers. About 83 × 83 mm, 29 cm³ (37 g of
       PETG).
 
+## Pocket utility knife: design and why
+
+1. **Someone else's design, edited by import.** The three STLs share one
+   frame: x along the knife (nose at -X, ring at +X), the Bottom's plate at
+   z 0–2 with the blade cavity under it. The slide extends the blade
+   toward -X.
+   - **Licence:** the Printables page couldn't be read, so its meshes stay
+     out of git, like the MTG card scanner's.
+2. **Lettering removed (the user asked, for simpler prints):** a word
+   engraved 0.5 mm into the Bottom's z = 2 face and "F1" 0.75 mm into its
+   z = -4 face. Each is filled with a box from the face to 0.5 mm past its
+   floor. The Top and Slide have none.
+3. **How the stops work:**
+   - **Pegs:** the Slide carries the blade in a 0.6 mm pocket. Its two pegs
+     (Ø3.5, 6.5 mm apart, `peg_pitch`) pass through the blade's back
+     notches and ride in the Bottom's slot.
+   - **Fingers:** a sprung finger beside each end of the slot, freed by a
+     slit on the slot's +y side, drops a 0.8 mm bump next to the end peg.
+   - **Original stops:** retracted (as modelled, tip 2.7 mm inside the
+     nose) and extended, 23.57 mm on (tip about 21 mm out along the edge).
+4. **Third stop (the user asked for about 3 mm out, for box cutting):** at
+   `mid_travel` (6.5 mm) from retracted. The tip is then 3.0 mm past the
+   nose square to its face, 3.8 mm along the edge.
+   - **Bump:** fills the waist between the two pegs, clipped by the pegs'
+     real footprint (from the Slide STL, with their root flare) at every
+     stop, `bump_clearance` (0.1) clear. A peg meets it about 55° from
+     the slot's axis, so it holds both ways, at least as firmly as the end
+     bumps.
+   - **Why 6.5 mm:** any closer to retracted and the bump would press on
+     the rear peg there. An assert keeps `mid_travel` at least
+     `peg_pitch`. The user chose 6.5 over 5.75 mm, which would have
+     needed a trimmed bump with 0.75 mm of play.
+   - **Finger on the -y side:** the +y side has no room between the two
+     existing fingers; a third would share a 1 mm root with one of them.
+     The new finger mirrors their 2 mm width and 1.25 mm slit. Its root is
+     at `finger_root_x` (20), 4.25 mm from the bump, as on the existing
+     fingers, and a gap past the bump frees its end.
+   - **Under it:** the finger lies over the blade cavity (to y -20.6). Its
+     slit's outer edge lies over solid wall, so in print the slit has a
+     1.25 mm bridged top.
+5. **Print orientation:** the Bottom prints with its z = 2 face on the bed,
+   the only way its plate doesn't bridge the cavity. The engraved word
+   there printed as 115 mm² of bridged letter floors, which are now gone.
+
 ## Card scanner: design and why
 
 1. **Stack in the box (the user's choice over a ramp):** each card is laid
@@ -1535,6 +1591,10 @@ PNG previews need the sandbox disabled, or OpenSCAD writes nothing.
    - **Screw, nut and jaw:** none.
    - **Hat stretcher:** none (one degenerate sliver in the chamfer). The
      brace has none.
+   - **Pocket utility knife Bottom (z = 2 face on the bed):** only the
+     new slit's 1.25 mm bridged top over the wall, at 0.01 mm into it
+     (7.5 mm²). Laid on its z = -4 face instead, the original has about
+     1,970 mm² of overhang, which is how its print orientation was found.
    - **Card scanner:** none on the sleeve, knob, base or box. On the mast,
      only the 0.5 mm-deep ceilings in the engraved scale. On the shelf,
      only the three pocket ceilings, 16 × 30 mm bridges.
@@ -1770,6 +1830,20 @@ PNG previews need the sandbox disabled, or OpenSCAD writes nothing.
        (all four pocket walls), or 0.3 mm down.
      - The phone moved 0.7 mm back (the stop), sideways (the lips) or
        down.
+   - **Pocket utility knife, Slide against Bottom (intersection volume):**
+     - **Clear:** at 0, `mid_travel` and 23.57 mm. Also the new bump and
+       finger alone at 0 and 23.57, and the modelled blade (`blade_at`)
+       at all three.
+     - **Overlap:** at `mid_travel` ± 0.2 and ± 0.5 (the new bump, both
+       ways), at 0.5 and 23.07 (the original bumps), and past either end.
+     - **Diff against the original Bottom:** only the two lettering
+       areas, the bump, and the slit and its gap.
+     - **Unchanged:** the Top and Slide exports have the originals'
+       triangle sets.
+     - **Manifold:** the Bottom has a sliver under 0.01 mm where the
+       bump meets the slot's chamfer at z = 0. With exact vertices every
+       edge is shared by two triangles; rounding to 4 places merges it and
+       flags 4 edges.
    - **Bird feeder diff:** `difference()` the new feeder and the original
      both ways. The only pieces left should be at the towers, the window
      and rail block, and the ridges.
@@ -1846,6 +1920,10 @@ cd ../hat_stretcher
 for p in half rod nuts brace; do
   openscad -o hat_stretcher_$p.stl -D "part=\"$p\"" hat_stretcher.scad
 done
+cd ../pocket-utility-knife
+for p in bottom top slide; do
+  openscad -o pocket_utility_knife_$p.stl -D "part=\"$p\"" pocket_utility_knife.scad
+done
 cd ../card_scanner
 for p in mast sleeve knob shelf base box; do
   openscad -o card_scanner_$p.stl -D "part=\"$p\"" card_scanner.scad
@@ -1884,6 +1962,11 @@ for p in mounted half rod nuts brace; do r hat_stretcher hat_stretcher hat_stret
 for p in mounted mast sleeve knob shelf base box; do r card_scanner card_scanner card_scanner_$p $p; done
 r card_scanner card_scanner card_scanner_mounted_low mounted cam_h=130
 for p in mounted holder lock shim; do r tracker_holder suction_cup_tracker_holder tracker_holder_$p $p; done
+for p in mounted bottom top slide; do
+  r pocket-utility-knife pocket_utility_knife pocket_utility_knife_$p $p
+done
+r pocket-utility-knife pocket_utility_knife pocket_utility_knife_mounted_retracted mounted stop=0
+r pocket-utility-knife pocket_utility_knife pocket_utility_knife_mounted_extended mounted stop=23.57
 ```
 
 ## Tuning notes for the user
@@ -2009,6 +2092,12 @@ for p in mounted holder lock shim; do r tracker_holder suction_cup_tracker_holde
   - **Brace:** if it's hard to push onto the nut block, or falls out, adjust
     `brace_side_clearance`. If it won't drop in past the oval wall, raise
     `brace_clearance`. Move the feet with `brace_feet` if the vents change.
+- **Pocket utility knife:**
+  - **Third stop:** `mid_travel` sets it (at least 6.5). The mounted
+    view echoes how far the tip is past the nose at each stop.
+  - **Detent:** if it's too stiff or too weak, change `bump_depth` (0.8,
+    as on the original bumps) or move `finger_root_x` (further from the
+    bump is softer). `bump_clearance` sets the play at the stop.
 - **Card scanner:**
   - **Phone:** set `phone_l`, `phone_w`, `lens_from_top` and
     `lens_from_side`. `shelf_pos` picks the shelf position for the

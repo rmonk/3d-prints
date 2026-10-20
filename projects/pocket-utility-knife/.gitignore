@@ -1,0 +1,5 @@
+# "Utility Knife F1 Gen2" (Printables 1104014) isn't ours, and its licence
+# hasn't been checked against this CC BY-SA repo. Keep its meshes (original
+# and edited) out of git; only pocket_utility_knife.scad is ours.
+*.stl
+*.3mf
