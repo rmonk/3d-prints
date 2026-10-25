@@ -30,7 +30,7 @@
 //     instead, which prints and still keeps the cards in.
 //   - Lane: unchanged at the ramp.
 
-part = "body"; // [mounted, body, slide, none]
+part = "body"; // [all, mounted, body, slide, none]
 
 /* [Body] */
 // How much higher the phone sits
@@ -129,7 +129,8 @@ if (part == "mounted") {
 } else if (part == "body") {
   // As the original prints: +Z (the lattice face) down
   translate([0, 0, lattice_z]) rotate([180, 0, 0]) body();
-} else if (part == "slide") {
-  // On its edge, -X down
+} else if (part == "slide" || part == "all") {
+  // On its edge, -X down. "all" is only the slide: the stretched body is
+  // unfinished and isn't exported.
   translate([0, 0, -slide_x0]) rotate([0, -90, 0]) slide();
 }

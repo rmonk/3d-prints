@@ -39,7 +39,7 @@
 // insert print with +Z up, the lid upside down.
 
 // column and column_2 are the lid's support dowels, unchanged
-part = "body"; // [body, lid, insert, column, column_2, none]
+part = "body"; // [all, body, lid, insert, column, column_2, none]
 // Hollow the body (see above) and the lid
 lighten_body = true;
 lighten_lid = false;
@@ -262,7 +262,21 @@ module insert() {
     reslot(insert_slot, insert_slot_faces) import("original/scry_insert.stl", convexity = 10);
 }
 
-if (part == "body") body();
+// Each part's rotation from the 3MF's plate placement, without its position
+column_tf = [[-0.309016968, 0, 0.951056525, 0],
+             [0.951056525, 0, 0.309016968, 0],
+             [0, 1, 0, 0]];
+
+if (part == "all") {
+    // Every part in print orientation, side by side, as the 3MF lays them
+    // out over its two plates
+    translate([0, 0, 37.5]) body();
+    translate([110, 0, 12.45]) rotate([180, 0, 0]) lid();
+    translate([217, 0, 35.82]) rotate([0, 0, -90]) insert();
+    translate([217, 60, 72.5]) multmatrix(column_tf) import("original/scry_column.stl", convexity = 10);
+    translate([217, 78, 72.5]) multmatrix(column_tf) import("original/scry_column_2.stl", convexity = 10);
+}
+else if (part == "body") body();
 else if (part == "lid") lid();
 else if (part == "insert") insert();
 // The lid's support dowels have no magnets; they're included as they are

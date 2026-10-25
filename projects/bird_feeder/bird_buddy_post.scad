@@ -74,7 +74,7 @@ include <../../library/BOSL2/threading.scad>
 // Which part to render
 // (print the collar, collar pin, cradle and lock pin from the Bird Buddy
 // variant's STLs)
-part = "mounted"; // [mounted, post_mount, post_cap, ball, stem, ball_ring]
+part = "mounted"; // [all, mounted, post_mount, post_cap, ball, stem, ball_ring]
 // Camera angle shown in the mounted view: 0 looks along the wood, 90
 // straight out from it
 cam_yaw = 90;
@@ -427,6 +427,14 @@ module wp_assembly() {
 
 if (part == "mounted") {
     wp_assembly();
+} else if (part == "all") {
+    // This file's parts in print orientation, side by side. The collar,
+    // pins and cradle come from the variant's "all".
+    post_mount_print();
+    right(45) post_cap_print();
+    translate([45, 55, 0]) wp_ball_print();
+    translate([100, -3, 0]) wp_stem_print();
+    translate([100, 75, 0]) ball_ring_print();
 } else {
     if (part == "post_mount") post_mount_print();
     if (part == "post_cap") post_cap_print();

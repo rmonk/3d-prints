@@ -53,7 +53,7 @@ include <../../library/suction_cup.scad>
 
 /* [Output] */
 // Which part(s) to render
-part = "holder"; // [holder, lock, shim, mounted]
+part = "holder"; // [all, holder, lock, shim, mounted]
 
 /* [Case] */
 // Width of the case (its short side)
@@ -428,6 +428,11 @@ if (part == "mounted") {
         antenna_model();
     }
     %translate([-60, -70, glass_z - 3]) cube([120, 200, 3]);
+} else if (part == "all") {
+    // Every part in print orientation, side by side
+    holder_print();
+    translate([-20, 22, 0]) lock_bar();
+    right(64) shim_print();
 } else if (part == "holder") {
     holder_print();
 } else if (part == "lock") {

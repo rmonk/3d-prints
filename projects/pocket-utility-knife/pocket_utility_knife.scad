@@ -15,26 +15,29 @@
 // retracted stop (as modelled, tip 2.7 mm inside the nose) and the
 // extended one, 23.57 mm further on (tip about 21 mm out along the edge).
 //
-// The new stop is mid_travel (6.5 mm) out from retracted, with the tip
-// 3.0 mm past the nose square to its face (3.8 mm along the edge; the
-// mounted view echoes these). Its finger is on the slot's -y side, because
-// the +y side has no room between the two existing fingers. Its bump fills
-// the waist between the two pegs, so it holds the blade both ways, at
-// about 55 degrees of contact, at least as firmly as the end bumps. mid_travel can't be less than the pegs' spacing
-// (6.5 mm): any less, and the bump would press on a peg at the retracted
-// stop.
+// The new stop is set by mid_stop: by default the tip 3.0 mm past the nose
+// square to its face (3.8 mm along the edge), which is 6.5 mm of slide
+// travel from retracted. Every render echoes all three. Its finger is on the
+// slot's -y side, because the +y side has no room between the two existing
+// fingers. Its bump fills the waist between the two pegs, so it holds the
+// blade both ways, at about 55 degrees of contact, at least as firmly as the
+// end bumps. The travel can't be less than the pegs' spacing (6.5 mm): any
+// less, and the bump would press on a peg at the retracted stop.
 //
 // Coordinates are the STLs' own, which share one frame: x along the knife
 // (nose at -X, ring at +X), the Bottom's plate at z 0-2, the slide moving
 // along -X to extend. Exports keep the STLs' print orientation.
 
-part = "bottom"; // [bottom, top, slide, mounted, none]
-// Mounted view: slide position, mm from retracted toward the nose
-stop = 6.5; // [0, 6.5, 23.57]
+part = "bottom"; // [all, bottom, top, slide, mounted, none]
+// Mounted view: which stop the slide is at
+view_stop = "mid"; // [retracted, mid, extended]
 
 /* [Third stop] */
-// Slide travel from retracted to the new stop (at least peg_pitch)
-mid_travel = 6.5;
+// Where the new stop is, in the units mid_stop_measure picks
+mid_stop = 3.0;
+// square: blade tip past the nose, square to its face. edge: tip past the
+// nose along the cutting edge. travel: slide travel from retracted.
+mid_stop_measure = "square"; // [square, edge, travel]
 // How far the bump reaches into the slot (the existing bumps reach 0.8)
 bump_depth = 0.8;
 // Gap between the bump and the pegs at every stop
@@ -43,8 +46,8 @@ bump_clearance = 0.1;
 bump_round = 0.3;
 // Finger slit width, as on the existing fingers
 slit_w = 1.25;
-// Where the finger joins the plate (its slit starts here)
-finger_root_x = 20;
+// Finger length, from its root (where the slit starts) to the bump's middle
+finger_len = 4.25;
 // Finger material past the bump's base, before the free-end gap
 finger_tip = 1.1;
 
@@ -84,10 +87,25 @@ blade_end_slope = 0.766;
 blade_tip_r = 61.3;
 blade_tip_l = blade_tip_r - blade_l;
 
-assert(mid_travel >= peg_pitch - 0.001,
-       "mid_travel below the peg spacing: the bump would press on a peg when retracted");
+// The blade tip's distance past the nose, along the edge, after slide
+// travel t, and the same square to the nose's face
+function tip_out(t) = nose_x - (blade_tip_l - t);
+nose_secant = sqrt(1 + nose_slope * nose_slope);
+function travel_for_out(out) = out - tip_out(0);
+
+mid_travel =
+    mid_stop_measure == "travel" ? mid_stop
+  : mid_stop_measure == "edge" ? travel_for_out(mid_stop)
+  : mid_stop_measure == "square" ? travel_for_out(mid_stop * nose_secant)
+  : undef;
+assert(!is_undef(mid_travel), str("unknown mid_stop_measure: ", mid_stop_measure));
+
+assert(mid_travel >= peg_pitch - 0.01,
+       str("third stop too close to retracted: the bump would press on a peg there. ",
+           "Least: ", peg_pitch, " mm travel, ", tip_out(peg_pitch), " mm along the edge, ",
+           tip_out(peg_pitch) / nose_secant, " mm square"));
 assert(mid_travel + peg_pitch < full_travel,
-       "mid_travel too close to the extended stop");
+       "third stop too close to the extended stop");
 
 // Pegs at a stop, mm toward the nose from retracted
 function pegs_at(t) = [for (x = peg_x) x - t];
@@ -119,6 +137,7 @@ module mid_bump2d() {
 // The finger's free end starts finger_tip past the bump's base, which is
 // where the right-hand peg (grown by bump_clearance) meets the slot edge
 gap_x = mid_pegs[1] - peg_d / 2 + finger_tip;
+finger_root_x = (mid_pegs[0] + mid_pegs[1]) / 2 - finger_len;
 
 // Slit beside the finger, and the gap that frees its end
 module finger_cut2d() {
@@ -163,17 +182,27 @@ module blade_at(t) translate([-t, 0, -blade_t])
                  [blade_tip_r - blade_h * blade_end_slope, -blade_h],
                  [blade_tip_l + blade_h * blade_end_slope, -blade_h]]);
 
-// How far the blade's tip is past the nose at each stop: along the edge,
-// and square to the nose's face
-if (part == "mounted") for (t = [0, mid_travel, full_travel]) {
-    out = nose_x - (blade_tip_l - t);
-    echo(str("stop ", t, " mm: tip ", out, " mm past the nose along the edge, ",
-             out / sqrt(1 + nose_slope * nose_slope), " mm square to it"));
-}
+stops = [["retracted", 0], ["mid", mid_travel], ["extended", full_travel]];
+stop = stops[search([view_stop], stops)[0]][1];
+
+// Where the blade's tip is at the third stop (and, in the mounted view, at
+// every stop): past the nose along the edge, and square to the nose's face
+if (part != "none")
+    for (s = part == "mounted" ? stops : [stops[1]])
+        echo(str(s[0], " stop: ", s[1], " mm travel, tip ", tip_out(s[1]),
+                 " mm past the nose along the edge, ", tip_out(s[1]) / nose_secant,
+                 " mm square to it"));
 
 if (part == "bottom") bottom();
 else if (part == "top") import(stl_top, convexity = 10);
 else if (part == "slide") import(stl_slide, convexity = 10);
+else if (part == "all") {
+    // Each part on the bed as it prints: the Bottom on its z = 2 face, the
+    // Top and Slide on their lowest faces. The exports keep the STLs' frame.
+    translate([0, 0, 2]) rotate([180, 0, 0]) bottom();
+    translate([0, -20, 4]) import(stl_top, convexity = 10);
+    translate([0, -55, 6]) import(stl_slide, convexity = 10);
+}
 else if (part == "mounted") {
     color("steelblue") bottom();
     color("orange") slide_at(stop);

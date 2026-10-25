@@ -53,7 +53,7 @@
 
 include <../../library/shapes.scad>
 
-part = "mounted"; // [mounted, mast, sleeve, knob, shelf, base, box, none]
+part = "mounted"; // [all, mounted, mast, sleeve, knob, shelf, base, box, none]
 // Shelf position on the tower: -1 left, 0 centre, 1 right (seen from the
 // front). Right suits lenses at the top right of the phone's face.
 shelf_pos = 1;
@@ -520,6 +520,13 @@ module view_cone()
     translate([box_dx - card_l / 2, -card_w / 2, box_floor + eps]) cube([card_l, card_w, eps]);
   }
 
+// On its side, -Y down
+module mast_print() translate([0, 0, -tower_y0]) rotate([90, 0, 0]) mast();
+// On its floor, +X down, mouth up
+module sleeve_print() translate([0, 0, sl_x[1]]) rotate([0, 90, 0]) sleeve();
+// Right side up, on its ribs
+module shelf_print() translate([0, -shelf_y, -shelf_bot]) shelf();
+
 if (part == "mounted") {
   color("lightgray") base();
   color("slategray") sleeve();
@@ -528,18 +535,23 @@ if (part == "mounted") {
   color("dimgray") { knob_mounted(); bolt(); }
   color("wheat") translate([box_dx, 0, 0]) box();
   %phone();
+} else if (part == "all") {
+  // Every part in print orientation, side by side
+  base();
+  translate([0, -50, 0]) mast_print();
+  translate([45, 171, 0]) sleeve_print();
+  translate([30, 171, 0]) knob();
+  translate([0, 171, 0]) shelf_print();
+  translate([0, 86, 0]) box();
 } else if (part == "mast") {
-  // On its side, -Y down
-  translate([0, 0, -tower_y0]) rotate([90, 0, 0]) mast();
+  mast_print();
 } else if (part == "sleeve") {
-  // On its floor, +X down, mouth up
-  translate([0, 0, sl_x[1]]) rotate([0, 90, 0]) sleeve();
+  sleeve_print();
 } else if (part == "knob") {
   // Flat, head pocket up
   knob();
 } else if (part == "shelf") {
-  // Right side up, on its ribs
-  translate([0, -shelf_y, -shelf_bot]) shelf();
+  shelf_print();
 } else if (part == "base") {
   base();
 } else if (part == "box") {

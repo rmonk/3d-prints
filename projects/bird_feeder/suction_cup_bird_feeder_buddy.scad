@@ -86,7 +86,7 @@ include <suction_cup_bird_feeder_modular.scad>
 
 /* [Output] */
 // Which part to render
-part = "mounted"; // [mounted, camera_mount, cam_lock_bar, camera_collar, collar_pin, camera_cradle, camera_cap, cam_pin, upper_mount, solar_frame, mount, tray, panel, lock, perch]
+part = "mounted"; // [all, mounted, camera_mount, cam_lock_bar, camera_collar, collar_pin, camera_cradle, camera_cap, cam_pin, upper_mount, solar_frame, mount, tray, panel, lock, perch]
 // Side the camera goes on (+X is on the left seen from indoors)
 buddy_side = 1; // [1:Left from indoors (+X), -1:Right from indoors (-X)]
 
@@ -822,7 +822,7 @@ module solar_panel_local() {
 module camera_mount_print() translate([0, 0, -cm_x0]) rotate([0, -90, 0]) camera_mount();
 module camera_collar_print() translate([0, 0, -y_sb]) rotate([90, 0, 0]) camera_collar();
 module camera_cradle_print() rotate([90, 0, 0]) camera_cradle_local();
-module camera_cap_print() translate([0, 0, -cap_y0]) rotate([90, 0, 0]) camera_cap_local();
+module camera_cap_print() translate([0, 0, -(cap_y0 - cap_sink)]) rotate([90, 0, 0]) camera_cap_local();
 module upper_mount_print()
     translate([0, 0, um_h]) rotate([90, 0, 0])
         rotate([-roof_pitch, 0, 0]) translate([0, -Y0, -roof_back_z]) upper_mount();
@@ -856,6 +856,19 @@ if (buddy_output && part == "mounted") {
     }
     for (s = [-1, 1])
         %translate([s * cup_x, 0, glass_z]) cylinder(d1 = cup_d, d2 = 20, h = cup_standoff);
+} else if (buddy_output && part == "all") {
+    // This variant's own parts in print orientation, side by side. The
+    // feeder's parts are the modular file's "all". Only the camera mount
+    // changes with buddy_side; it's centred first, so either side fits.
+    mirror([mside, 0, 0]) translate([29.4, -10, 0]) camera_mount_print();
+    translate([-60, -97.5, 0]) solar_frame_print();
+    translate([85, 50, 0]) camera_cradle_print();
+    translate([79, -40, 0]) camera_cap_print();
+    translate([38, 144, 0]) camera_collar_print();
+    translate([145, -10, 0]) upper_mount_print();
+    translate([-30, 110, 0]) cam_lock_bar();
+    translate([-30, 125, 0]) collar_pin();
+    translate([0, 125, 0]) cam_pin();
 } else if (buddy_output) {
     mirror([mside, 0, 0]) {
         if (part == "camera_mount") camera_mount_print();

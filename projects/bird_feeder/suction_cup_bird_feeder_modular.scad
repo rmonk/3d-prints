@@ -668,7 +668,7 @@ if (modular_output) {
         if (part == "all" || part == "roof")
             translate([0, part == "all" ? 150 : 0, 0]) roof_print();
         if (part == "all" || part == "roof_bracket")
-            translate([part == "all" ? -tray_w / 2 - 60 : 0, 0, 0]) roof_bracket_print();
+            translate([part == "all" ? -tray_w / 2 - 160 : 0, 0, 0]) roof_bracket_print();
         if (part == "all" || part == "panel")
             translate([0, part == "all" ? -(rail_z + perch_d + 40) - panel_h : 0, 0]) panel();
     }
