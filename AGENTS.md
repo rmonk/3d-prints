@@ -58,6 +58,11 @@ Other projects:
   spread by a printed turnbuckle, for stretching the band of the user's
   57 cm flat cap. A drop-in brace in each half carries the turnbuckle's
   thrust to the back of the oval.
+- **Succulent liner:** a planting insert for La Fermière's terracotta
+  yogurt pots, which have no drainage hole. A liner with a perforated
+  floor hangs from a collar on the rim, 8 mm above the cup's bottom, so
+  runoff collects underneath instead of soaking the roots. The collar's
+  skirt has a vine debossed round it.
 
 ## Layout
 
@@ -234,6 +239,11 @@ preview/<name>/        rendered PNGs, one subdirectory per project
   - `card_scanner_{mast,sleeve,knob,shelf,base,box}.stl`: exported parts,
     in print orientation. The shelf STL serves all three positions and
     every height.
+- `projects/succulent_liner/`:
+  - `succulent_liner.scad`: the succulent liner. Plain OpenSCAD, no
+    libraries.
+  - `succulent_liner_{liner,collar}.stl`: exported parts, in print
+    orientation.
 - `preview/<project>/<model>_<part>.png`: a `mounted` view, an `all` view
   (every part in print orientation) and one image per part for each model,
   made by the commands under **Previews**.
@@ -326,6 +336,7 @@ without asking.
 | Antenna rod | 8 mm diameter at a narrow section that's more than 30 mm long. The antenna is larger at both ends. |
 | Antenna clamp bolt | One M3 bolt, 13–18 mm long (14 or 16 mm recommended), plus one M3 nut |
 | Box holder object | 60–65 mm wide and 20–25 mm thick. It's a light rectangular prism, used indoors. |
+| La Fermière terracotta pot | 56 mm inside, 68 mm outside at the rim, 69 mm deep inside (first measured as 44). Straight walls that curve inward over the bottom couple of mm. |
 
 ## Antenna clamp: design and why it ended up this way
 
@@ -1398,6 +1409,53 @@ unless the user asks otherwise.
       the thrust runs along the layers. About 83 × 83 mm, 29 cm³ (37 g of
       PETG).
 
+## Succulent liner: design and why
+
+1. **The pot has no drainage hole,** so succulents planted straight in it
+   sit in water and rot. The liner is `liner_h` (54 mm) tall overall
+   (the user found a liner reaching to 8 mm off the floor much too
+   tall, and chose 54 mm to clear the curve at the cup's bottom), so its
+   floor stands 18 mm above the cup's bottom, room for about 44 ml of
+   runoff. An assert keeps at least `spacer` (8 mm). A
+   hex grid of 3 mm drain holes (`drain_d`) lets the water through. Lift
+   the liner out to tip the water away. There's about 52.6 mm of soil.
+2. **It hangs from the rim, with no feet (the user's call).** A collar
+   rests on the rim, and the liner hangs in its bore by a 45° flare round
+   its top (`flare`, 1.5 mm), seated in a matching countersink. The
+   liner's top is flush with the collar's.
+   - **Clearance:** the liner is 54 mm across, `clearance` (1 mm) a side
+     inside the cup, so it clears the walls and the curved bottom. The
+     bore is `bore_clearance` (0.3 mm) a side round the liner.
+3. **Collar (the user asked for it):** a lip `lip_t` (3 mm) thick on the
+   rim, and a skirt `skirt_h` (10 mm) down the outside, 0.75 mm clear of
+   the cup (`skirt_clearance`), so the skirt centres it. It's about
+   73 mm across. The first print came out 0.5 mm small inside (67.5 mm
+   for 68 drawn), so `skirt_clearance` went from 0.5 to 0.75.
+   - **History:** the user first asked for the lip to reach 13 mm out,
+     from a 12 mm rim measurement that turned out wrong. With the real
+     6 mm rim, the user chose a skirt that hugs the cup.
+   - **Chamfers (the user asked for them, for printing):** 45° on the
+     lip's outer top edge, the skirt's bottom edges and the bore's
+     bottom edge.
+4. **Vine (the user asked for it):** debossed `vine_depth` (0.6 mm) round
+   the skirt. A stem makes `vine_waves` (6) waves, with a leaf rising
+   from each trough and one hanging from each crest.
+   - **Build:** each groove is hulled from thin slices with a 45° V, or
+     a flat-bottomed trapezoid where it's wider than twice the depth,
+     placed along the path on the cylinder. Their faces are never
+     steeper than 45° from vertical, so they print on the vertical
+     skirt.
+   - **Asserts:** they check that the vine leaves 1 mm of skirt behind it
+     and that every leaf stays on its band.
+5. **Two parts:** the skirt hangs from the lip, so the collar can only
+   print upside down, and in one piece the liner's floor would then be a
+   54 mm bridge with holes in it.
+6. **Print orientation:**
+   - **Liner:** upright, on its floor. The walls and drain holes are
+     vertical and the flare's underside is 45°. 4-line walls, a 5-layer
+     floor, 16.9 cm³.
+   - **Collar:** upside down, top on the bed. 5-line skirt, 9.8 cm³.
+
 ## Pocket utility knife: design and why
 
 1. **Someone else's design, edited by import.** The three STLs share one
@@ -1737,6 +1795,7 @@ PNG previews need the sandbox disabled, or OpenSCAD writes nothing.
    - **Screw, nut and jaw:** none.
    - **Hat stretcher:** none (one degenerate sliver in the chamfer). The
      brace has none.
+   - **Succulent liner:** none on either part.
    - **Pocket utility knife Bottom (z = 2 face on the bed):** only the
      new slit's 1.25 mm bridged top over the wall, at 0.01 mm into it
      (7.5 mm²). Laid on its z = -4 face instead, the original has about
@@ -1972,6 +2031,13 @@ PNG previews need the sandbox disabled, or OpenSCAD writes nothing.
      0.5 mm sideways (the fins), or closed past zero; the rod's wheel with
      the halves closed past zero; a nut moved 0.5 mm back, sideways or out
      of its slot's closed side.
+   - **Succulent liner, poses that must be clear** (the cup is `cup()`):
+     the collar on the cup (0.01 mm up); the liner in the collar
+     (0.01 mm up), against the cup and the collar; the liner lowered in
+     from 10 and 30 mm; the liner moved 0.9 mm sideways, against the cup.
+   - **Succulent liner, poses that must overlap:** the collar moved
+     0.5 mm down (it rests on the rim) or 1 mm sideways (the skirt);
+     the liner moved 0.5 mm down (it hangs on the flare).
    - **Card scanner, poses that must be clear:**
      - **Press fits:** run these with `socket_clearance` and
        `pocket_clearance` at 0.05. At 0 a seated part only touches,
@@ -2109,6 +2175,10 @@ for p in mast sleeve knob shelf base box; do
 done
 cd ../mtg-card-scanner
 openscad -o scanner_v2_slide.stl -D 'part="slide"' scanner_v2_extension.scad
+cd ../succulent_liner
+for p in liner collar; do
+  openscad -o succulent_liner_$p.stl -D "part=\"$p\"" succulent_liner.scad
+done
 cd ../..
 ```
 
@@ -2142,6 +2212,7 @@ for p in mounted all mast sleeve knob shelf base box; do r card_scanner card_sca
 r card_scanner card_scanner card_scanner_mounted_low mounted cam_h=130
 for p in mounted all holder lock shim; do r tracker_holder suction_cup_tracker_holder tracker_holder_$p $p; done
 for p in mounted all base lid lock; do r tracker_case suction_cup_tracker_case tracker_case_$p $p; done
+for p in mounted all liner collar; do r succulent_liner succulent_liner succulent_liner_$p $p; done
 for p in mounted all bottom top slide; do
   r pocket-utility-knife pocket_utility_knife pocket_utility_knife_$p $p
 done
@@ -2320,6 +2391,17 @@ r pocket-utility-knife pocket_utility_knife pocket_utility_knife_mounted_extende
   - **Fit:** `box_clearance` (box in frame). The press fits are
     `socket_clearance` (sleeve in socket) and `pocket_clearance` (shelf on
     the tower): raise them if too tight, lower them (negative) if loose.
+- **Succulent liner:**
+  - **Fit:** if the collar is tight or loose on the cup, adjust
+    `skirt_clearance`. If the liner rubs the cup, raise `clearance`.
+    `bore_clearance` sets how much it moves in the collar.
+  - **Height:** `liner_h` sets the liner's height. A shorter liner leaves
+    more water room and less soil; the assert stops it coming closer
+    than `spacer` to the cup's floor. If soil washes through, lower `drain_d`
+    or lay a scrap of mesh on the floor.
+  - **Vine:** `vine_waves`, `vine_amp`, `leaf_len`, `leaf_w`,
+    `leaf_angle` and `vine_depth`. The asserts say if a leaf runs off
+    the band.
 - **Scanner V2.3:**
   - **Slide:** `slide_wall_h` sets the walls' height above the ramp.
 - **Box holder object:** if your object is a fixed size, set `obj_t_max` to
